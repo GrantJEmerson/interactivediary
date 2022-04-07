@@ -8,40 +8,31 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.group24.interactivediary.databinding.ActivityHomeBinding;
+
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 public class HomeActivity extends AppCompatActivity {
-    public static final String TAG = "HomeActivity";
-    private Toolbar toolbar;
 
-    // Views in the layout
-    private RelativeLayout homeRelativeLayout;
+    private AppBarConfiguration appBarConfiguration;
+    private ActivityHomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
 
-        // Initialize the views in the layout
-        homeRelativeLayout = findViewById(R.id.homeRelativeLayout);
-        toolbar = findViewById(R.id.toolbar);
+        binding = ActivityHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        // Set up toolbar
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.toolbar);
 
-        /* TODO: Figure out what this does and why it's part of the default template
-        NavController navController = Navigation.findNavController(this, R.id.nav_graph);
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
@@ -52,7 +43,6 @@ public class HomeActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-         */
     }
 
     @Override
@@ -77,12 +67,10 @@ public class HomeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /* TODO: Figure out what this does and why it's part of the default template
     @Override
     public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_graph);
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-     */
 }

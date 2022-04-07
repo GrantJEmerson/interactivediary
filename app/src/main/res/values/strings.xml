@@ -22,4 +22,5 @@
     <string name="verifying_credentials">Verifying credentials...</string>
     <string name="login_failed">Login failed, please try again</string>
     <string name="signup_failed">Signup failed, please try again</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
