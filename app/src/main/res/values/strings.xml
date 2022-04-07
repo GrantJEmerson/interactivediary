@@ -13,4 +13,13 @@
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
     <string name="back4app_app_id">a1GOMzUlyS5WAqPeVS9H8GIlV3UAPMZmKHyK34hS</string>
     <string name="back4app_client_key">B8jfg6uotkxVlfupUwhrnfVOcVbAKQihKXVVr1HX</string>
+    <string name="title_activity_login_signup">LoginSignupActivity</string>
+
+    <string name="Log_In">Log In</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="Sign_Up">Sign Up</string>
+    <string name="verifying_credentials">Verifying credentials...</string>
+    <string name="login_failed">Login failed, please try again</string>
+    <string name="signup_failed">Signup failed, please try again</string>
 </resources>

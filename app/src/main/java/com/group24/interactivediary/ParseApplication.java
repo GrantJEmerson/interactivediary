@@ -3,7 +3,7 @@ package com.group24.interactivediary;
 import android.app.Application;
 import com.parse.Parse;
 
-public class App extends Application {
+public class ParseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
