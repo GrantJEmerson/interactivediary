@@ -23,4 +23,6 @@
     <string name="login_failed">Login failed, please try again</string>
     <string name="signup_failed">Signup failed, please try again</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_entry_create">Create an Entry</string>
+    <string name="title_activity_home">Home</string>
 </resources>

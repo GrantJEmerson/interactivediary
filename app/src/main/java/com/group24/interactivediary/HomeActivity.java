@@ -1,8 +1,7 @@
 package com.group24.interactivediary;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -39,8 +38,7 @@ public class HomeActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                goEntryCreateActivity();
             }
         });
     }
@@ -72,5 +70,11 @@ public class HomeActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    // Starts an intent to go to the EntryCreate activity
+    private void goEntryCreateActivity() {
+        Intent intent = new Intent(this, EntryCreateActivity.class);
+        startActivity(intent);
     }
 }
