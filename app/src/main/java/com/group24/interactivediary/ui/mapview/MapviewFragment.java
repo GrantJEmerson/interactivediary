@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.group24.interactivediary.databinding.FragmentMapviewBinding;
 
 public class MapviewFragment extends Fragment {
+    public static final String TAG = "MapViewFragment";
 
     private FragmentMapviewBinding binding;
 
@@ -25,7 +26,22 @@ public class MapviewFragment extends Fragment {
         View root = binding.getRoot();
 
         final TextView textView = binding.textviewMapview;
-        mapviewViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        mapviewViewModel.getSelected().observe(getViewLifecycleOwner(), entryType -> {
+            switch (entryType) {
+                case 0: // private
+                    textView.setText("viewing map view for private entries");
+                    break;
+                case 1: // shared
+                    textView.setText("viewing map view for shared entries");
+                    break;
+                case 2: // public
+                    textView.setText("viewing map view for public entries");
+                    break;
+                default:
+                    break;
+            }
+        });
+
         return root;
     }
 

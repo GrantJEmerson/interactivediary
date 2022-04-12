@@ -3,24 +3,50 @@ package com.group24.interactivediary;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.group24.interactivediary.databinding.ActivityHomeBinding;
+import com.group24.interactivediary.ui.listview.ListviewFragment;
+import com.group24.interactivediary.ui.listview.ListviewViewModel;
+import com.group24.interactivediary.ui.mapview.MapviewFragment;
+import com.group24.interactivediary.ui.mapview.MapviewViewModel;
 
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Map;
+
 public class HomeActivity extends AppCompatActivity {
+    public static final String TAG = "HomeActivity";
 
     private ActivityHomeBinding binding;
+    private String[] tabTitles = {"Private", "Shared", "Public"};
+    private int[] tabIcons = {R.drawable.ic_baseline_person_24, R.drawable.ic_baseline_people_24, R.drawable.ic_baseline_public_24};
+
+    private Fragment curFragment;
+    private ListviewAdapter listviewAdapter;
+    private MapviewAdapter mapviewAdapter;
+
+    // Views in the layout
+    private TabLayout entryTypeTabLayout;
+    private ViewPager2 entryTypeViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +57,10 @@ public class HomeActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.toolbar);
 
+        listviewAdapter = new ListviewAdapter(this);
+        mapviewAdapter = new MapviewAdapter(this);
+
+        // Set up the bottom nav bar
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -40,6 +70,37 @@ public class HomeActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        // Set up the top nav bar
+        entryTypeTabLayout = binding.entryTypeTabLayout;
+        entryTypeViewPager = binding.entryTypeViewPager;
+
+        // Get the viewModels of the current instances of listview and mapview fragments
+        NavBackStackEntry backStackEntry = navController.getBackStackEntry(R.id.bottom_nav);
+        ViewModelProvider viewModelProvider = new ViewModelProvider(backStackEntry);
+        ListviewViewModel listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
+        MapviewViewModel mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
+
+        // Find current fragment being displayed
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_home);
+        curFragment = navHostFragment.getChildFragmentManager().getFragments().get(0);
+        // Set adapter to viewpager
+        if (curFragment.getClass().equals(ListviewFragment.class)) entryTypeViewPager.setAdapter(listviewAdapter);
+        else entryTypeViewPager.setAdapter(mapviewAdapter);
+
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(entryTypeTabLayout, entryTypeViewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                tab.setText(tabTitles[position]);
+                tab.setIcon(tabIcons[position]);
+                Log.e(TAG, "listviewViewModel.select(" + position + ");");
+                Log.e(TAG, "mapviewViewModel.select(" + position + ");");
+                listviewViewModel.select(position);
+                mapviewViewModel.select(position);
+            }
+        });
+        tabLayoutMediator.attach();
+
+        // Set up the entry add button
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,5 +135,37 @@ public class HomeActivity extends AppCompatActivity {
     private void goEntryCreateActivity() {
         Intent intent = new Intent(this, EntryCreateActivity.class);
         startActivity(intent);
+    }
+
+    private class ListviewAdapter extends FragmentStateAdapter {
+        public ListviewAdapter(AppCompatActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public Fragment createFragment(int position) {
+            return new ListviewFragment();
+        }
+
+        @Override
+        public int getItemCount() {
+            return 3;
+        }
+    }
+
+    private class MapviewAdapter extends FragmentStateAdapter {
+        public MapviewAdapter(AppCompatActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        public Fragment createFragment(int position) {
+            return new MapviewFragment();
+        }
+
+        @Override
+        public int getItemCount() {
+            return 3;
+        }
     }
 }

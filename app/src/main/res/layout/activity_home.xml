@@ -12,6 +12,7 @@
         tools:context=".HomeActivity">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="@style/Theme.InteractiveDiary.AppBarOverlay">
@@ -25,7 +26,42 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <include layout="@layout/content_home" />
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/entry_type_view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/entry_type_tab_layout" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/entry_type_tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/app_bar_layout">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:icon="@drawable/ic_baseline_person_24"
+                    android:text="@string/privateTab" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:icon="@drawable/ic_baseline_people_24"
+                    android:text="@string/sharedTab" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:icon="@drawable/ic_baseline_public_24"
+                    android:text="@string/publicTab" />
+            </com.google.android.material.tabs.TabLayout>
+
+        <include
+            layout="@layout/content_home"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/entry_type_tab_layout" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
@@ -35,6 +71,7 @@
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_marginBottom="16dp"
+            android:contentDescription="@string/createEntry"
             app:srcCompat="@drawable/ic_outline_add_24" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView

@@ -6,14 +6,13 @@ import androidx.lifecycle.ViewModel;
 
 public class ListviewViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
+    private final MutableLiveData<Integer> entryType = new MutableLiveData<>();
 
-    public ListviewViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is listview fragment");
+    public void select(Integer setTo) {
+        entryType.setValue(setTo);
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<Integer> getSelected() {
+        return entryType;
     }
 }

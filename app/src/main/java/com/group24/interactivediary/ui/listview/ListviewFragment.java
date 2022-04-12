@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.group24.interactivediary.databinding.FragmentListviewBinding;
 
 public class ListviewFragment extends Fragment {
+    public static final String TAG = "ListviewFragment";
 
     private FragmentListviewBinding binding;
 
@@ -25,7 +26,22 @@ public class ListviewFragment extends Fragment {
         View root = binding.getRoot();
 
         final TextView textView = binding.textviewListview;
-        listviewViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        listviewViewModel.getSelected().observe(getViewLifecycleOwner(), entryType -> {
+            switch (entryType) {
+                case 0: // private
+                    textView.setText("viewing list view for private entries");
+                    break;
+                case 1: // shared
+                    textView.setText("viewing list view for shared entries");
+                    break;
+                case 2: // public
+                    textView.setText("viewing list view for public entries");
+                    break;
+                default:
+                    break;
+            }
+        });
+
         return root;
     }
 

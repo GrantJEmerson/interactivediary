@@ -24,4 +24,8 @@
     <string name="title_mapview">Map View</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="privateTab">Private</string>
+    <string name="sharedTab">Shared</string>
+    <string name="publicTab">Public</string>
+    <string name="createEntry">Create Entry</string>
 </resources>
