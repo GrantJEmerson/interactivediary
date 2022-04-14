@@ -9,7 +9,7 @@
         tools:context=".ui.mapview.MapviewFragment">
 
         <TextView
-            android:id="@+id/textview_mapview"
+            android:id="@+id/textviewMapview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

@@ -9,7 +9,7 @@
         tools:context=".ui.listview.ListviewFragment">
 
         <TextView
-            android:id="@+id/textview_listview"
+            android:id="@+id/textviewListview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

@@ -8,7 +8,6 @@ import com.group24.interactivediary.MapviewAdapter;
 
 public class MapviewViewModel extends ViewModel {
     private final MutableLiveData<Integer> entryType = new MutableLiveData<>();
-    private MapviewAdapter mapviewAdapter;
 
     public MapviewViewModel() {}
 
@@ -18,13 +17,5 @@ public class MapviewViewModel extends ViewModel {
 
     public LiveData<Integer> getEntryType() {
         return entryType;
-    }
-
-    public void setMapviewAdapter(MapviewAdapter setTo) {
-        mapviewAdapter = setTo;
-    }
-
-    public MapviewAdapter getMapviewAdapter() {
-        return mapviewAdapter;
     }
 }

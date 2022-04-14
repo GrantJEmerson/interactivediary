@@ -9,95 +9,116 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavBackStackEntry;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.group24.interactivediary.databinding.ActivityHomeBinding;
 import com.group24.interactivediary.ui.listview.ListviewFragment;
 import com.group24.interactivediary.ui.listview.ListviewViewModel;
+import com.group24.interactivediary.ui.mapview.MapviewFragment;
 import com.group24.interactivediary.ui.mapview.MapviewViewModel;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 public class HomeActivity extends AppCompatActivity {
     public static final String TAG = "HomeActivity";
 
-    private ActivityHomeBinding binding;
+    public static final int PRIVATE = 0;
+    public static final int SHARED = 1;
+    public static final int PUBLIC = 2;
+
     private String[] tabTitles = {"Private", "Shared", "Public"};
     private int[] tabIcons = {R.drawable.ic_baseline_person_24, R.drawable.ic_baseline_people_24, R.drawable.ic_baseline_public_24};
 
-    private Fragment curFragment;
+    // Views in the layout
+    private Toolbar toolbar;
+    private Button privateButton;
+    private Button sharedButton;
+    private Button publicButton;
+    private BottomNavigationView navView;
+    private FloatingActionButton fab;
+    private FrameLayout fragmentContainer;
+
+    // Other necessary member variables
+    private ListviewFragment listviewFragment;
+    private MapviewFragment mapviewFragment;
+    private FragmentManager fragmentManager;
     private ViewModelProvider viewModelProvider;
     private ListviewViewModel listviewViewModel;
     private MapviewViewModel mapviewViewModel;
 
-    // Views in the layout
-    private TabLayout entryTypeTabLayout;
-    private ViewPager2 entryTypeViewPager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home);
 
-        binding = ActivityHomeBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        // Initialize the views in the layout
+        toolbar = findViewById(R.id.toolbar);
+        privateButton = findViewById(R.id.privateButton);
+        sharedButton = findViewById(R.id.sharedButton);
+        publicButton = findViewById(R.id.publicButton);
+        navView = findViewById(R.id.navView);
+        fab = findViewById(R.id.fab);
+        fragmentContainer = findViewById(R.id.fragmentContainer);
 
-        setSupportActionBar(binding.toolbar);
+        // Initialize other member variables
+        fragmentManager = getSupportFragmentManager();
+        // Create fragments
+        listviewFragment = new ListviewFragment();
+        mapviewFragment = new MapviewFragment();
+        viewModelProvider = new ViewModelProvider(this);
+        listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
+        mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
+
+        // Set up toolbar
+        setSupportActionBar(toolbar);
 
         // Set up the bottom nav bar
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_listview, R.id.navigation_mapview)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.navView, navController);
-        binding.navView.setOnItemSelectedListener(item -> {
-            Log.e(TAG, item.toString());
-            updateCurFragment();
+        // Set viewPager adapter to listviewAdapter by default
+        navView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.navigation_listview) displayListviewFragment();
+            if (item.getItemId() == R.id.navigation_mapview) displayMapviewFragment();
             return true;
         });
 
         // Set up the top nav bar
-        entryTypeTabLayout = binding.entryTypeTabLayout;
-        entryTypeViewPager = binding.entryTypeViewPager;
-
-        // Get the viewModels of the current instances of listview and mapview fragments
-        NavBackStackEntry backStackEntry = navController.getBackStackEntry(R.id.bottom_nav);
-        viewModelProvider = new ViewModelProvider(backStackEntry);
-        listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
-        Log.e(TAG, listviewViewModel.toString());
-        mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
-        Log.e(TAG, mapviewViewModel.toString());
-
-        updateCurFragment();
-
-        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(entryTypeTabLayout, entryTypeViewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+        privateButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                tab.setText(tabTitles[position]);
-                tab.setIcon(tabIcons[position]);
-                Log.e(TAG, "listviewViewModel.select(" + position + ");");
-                Log.e(TAG, "mapviewViewModel.select(" + position + ");");
-                listviewViewModel.setEntryType(position);
-                mapviewViewModel.setEntryType(position);
+            public void onClick(View view) {
+                listviewViewModel.setEntryType(PRIVATE);
+                mapviewViewModel.setEntryType(PRIVATE);
             }
         });
-        tabLayoutMediator.attach();
+
+        sharedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listviewViewModel.setEntryType(SHARED);
+                mapviewViewModel.setEntryType(SHARED);
+            }
+        });
+
+        publicButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listviewViewModel.setEntryType(PUBLIC);
+                mapviewViewModel.setEntryType(PUBLIC);
+            }
+        });
 
         // Set up the entry add button
-        binding.fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 goEntryCreateActivity();
@@ -133,24 +154,35 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void updateCurFragment() {
-        // Find current fragment being displayed
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_home);
-        curFragment = navHostFragment.getChildFragmentManager().getFragments().get(0);
-        Log.e(TAG, navHostFragment.getChildFragmentManager().getFragments().size() + " " + navHostFragment.getChildFragmentManager().getFragments().toString());
-        Log.e(TAG, curFragment.getClass().getCanonicalName());
-        // Set adapter to viewpager
-        if (curFragment.getClass().equals(ListviewFragment.class)) {
-            if (listviewViewModel.getListviewAdapter() == null) {
-                listviewViewModel.setListviewAdapter(new ListviewAdapter(this));
-            }
-            entryTypeViewPager.setAdapter(listviewViewModel.getListviewAdapter());
+    private void displayListviewFragment() {
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        if (listviewFragment.isAdded()) { // if the fragment is already in container
+            ft.show(listviewFragment);
         }
-        else {
-            if (mapviewViewModel.getMapviewAdapter() == null) {
-                mapviewViewModel.setMapviewAdapter(new MapviewAdapter(this));
-            }
-            entryTypeViewPager.setAdapter(mapviewViewModel.getMapviewAdapter());
+        else { // fragment needs to be added to frame container
+            ft.add(R.id.fragmentContainer, listviewFragment, "listViewFragment");
         }
+        // Hide mapviewFragment
+        if (mapviewFragment.isAdded()) {
+            ft.hide(mapviewFragment);
+        }
+        // Commit changes
+        ft.commit();
+    }
+
+    private void displayMapviewFragment() {
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        if (mapviewFragment.isAdded()) { // if the fragment is already in container
+            ft.show(mapviewFragment);
+        }
+        else { // fragment needs to be added to frame container
+            ft.add(R.id.fragmentContainer, mapviewFragment, "mapViewFragment");
+        }
+        // Hide listviewFragment
+        if (listviewFragment.isAdded()) {
+            ft.hide(listviewFragment);
+        }
+        // Commit changes
+        ft.commit();
     }
 }

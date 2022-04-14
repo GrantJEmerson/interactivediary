@@ -8,7 +8,6 @@ import com.group24.interactivediary.ListviewAdapter;
 
 public class ListviewViewModel extends ViewModel {
     private final MutableLiveData<Integer> entryType = new MutableLiveData<>();
-    private ListviewAdapter listviewAdapter;
 
     public ListviewViewModel() {}
 
@@ -18,13 +17,5 @@ public class ListviewViewModel extends ViewModel {
 
     public LiveData<Integer> getEntryType() {
         return entryType;
-    }
-
-    public void setListviewAdapter(ListviewAdapter setTo) {
-        listviewAdapter = setTo;
-    }
-
-    public ListviewAdapter getListviewAdapter() {
-        return listviewAdapter;
     }
 }

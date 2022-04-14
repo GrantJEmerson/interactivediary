@@ -7,47 +7,60 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.group24.interactivediary.databinding.FragmentListviewBinding;
+import com.group24.interactivediary.HomeActivity;
+import com.group24.interactivediary.R;
+
+import org.jetbrains.annotations.NotNull;
 
 public class ListviewFragment extends Fragment {
     public static final String TAG = "ListviewFragment";
 
-    private FragmentListviewBinding binding;
+    // Views in the layout
+    private TextView textviewListview;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        ListviewViewModel listviewViewModel =
-                new ViewModelProvider(this).get(ListviewViewModel.class);
+    // Other necessary member variables
+    private ViewModelProvider viewModelProvider;
+    private ListviewViewModel listviewViewModel;
 
-        binding = FragmentListviewBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {// Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_listview, container, false);
+    }
 
-        final TextView textView = binding.textviewListview;
+    @Override
+    public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Initialize the views in the layout
+        textviewListview = view.findViewById(R.id.textviewListview);
+
+        // Initialize other member variables
+        viewModelProvider = new ViewModelProvider(requireActivity());
+        listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
+
         listviewViewModel.getEntryType().observe(getViewLifecycleOwner(), entryType -> {
             switch (entryType) {
-                case 0: // private
-                    textView.setText("viewing list view for private entries");
+                case HomeActivity.PRIVATE: // private
+                    textviewListview.setText("viewing list view for private entries");
                     break;
-                case 1: // shared
-                    textView.setText("viewing list view for shared entries");
+                case HomeActivity.SHARED: // shared
+                    textviewListview.setText("viewing list view for shared entries");
                     break;
-                case 2: // public
-                    textView.setText("viewing list view for public entries");
+                case HomeActivity.PUBLIC: // public
+                    textviewListview.setText("viewing list view for public entries");
                     break;
                 default:
                     break;
             }
         });
 
-        return root;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
     }
 }
