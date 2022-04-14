@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.group24.interactivediary.ListviewAdapter;
-
 public class ListviewViewModel extends ViewModel {
     private final MutableLiveData<Integer> entryType = new MutableLiveData<>();
 

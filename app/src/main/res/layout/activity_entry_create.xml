@@ -11,6 +11,7 @@
     tools:context=".EntryCreateActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.InteractiveDiary.AppBarOverlay">
@@ -23,5 +24,82 @@
             app:popupTheme="@style/Theme.InteractiveDiary.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:id="@+id/entryCreateScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/appBarLayout">
+
+        <LinearLayout
+            android:id="@+id/entryCreateScrollViewLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/entryCreateTitleEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/Title"
+                android:textSize="34sp" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/entryCreateMediaCardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <ImageButton
+                android:id="@+id/entryCreateAddMediaButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/add_media"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <EditText
+                android:id="@+id/entryCreateTextEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/entry_text_hint"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/entry_type_desc" />
+
+            <RadioGroup
+                android:id="@+id/createEntryRadioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <RadioButton
+                    android:id="@+id/createEntryPrivateRadioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/privateButton" />
+
+                <RadioButton
+                    android:id="@+id/createEntrySharedRadioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sharedButton" />
+
+                <RadioButton
+                    android:id="@+id/createEntryPublicRadioButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/publicButton" />
+            </RadioGroup>
+
+            <Button
+                android:id="@+id/createEntryPostButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/post" />
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

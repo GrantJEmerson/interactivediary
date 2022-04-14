@@ -28,4 +28,15 @@
     <string name="sharedTab">Shared</string>
     <string name="publicTab">Public</string>
     <string name="createEntry">Create Entry</string>
+    <string name="Title">Title</string>
+    <string name="entry_text_hint">Write whatever you want!</string>
+    <string name="add_media">Add media</string>
+    <string name="post">Post</string>
+    <string name="entry_type_desc">Do you want your entry to be public, shared, or public? (You can change this later.)</string>
+    <string name="privateButton">Private (only you can see and edit this entry)</string>
+    <string name="sharedButton">Shared (only people you choose can see and edit this entry)</string>
+    <string name="publicButton">Public (everyone can see this entry, still only you can edit this entry)</string>
+    <string name="title_is_empty">You need to give your entry a title!</string>
+    <string name="text_is_empty">You need to give your entry some text!</string>
+    <string name="entry_type_is_empty">You need to indicate if your entry should be private, public, or shared!</string>
 </resources>
