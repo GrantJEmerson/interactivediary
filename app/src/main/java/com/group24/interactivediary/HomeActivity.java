@@ -3,18 +3,14 @@ package com.group24.interactivediary;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -30,8 +26,6 @@ import com.group24.interactivediary.ui.mapview.MapviewViewModel;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import java.util.List;
 
@@ -52,7 +46,6 @@ public class HomeActivity extends AppCompatActivity {
     private Button publicButton;
     private BottomNavigationView navView;
     private FloatingActionButton fab;
-    private FrameLayout fragmentContainer;
 
     // Other necessary member variables
     private ListviewFragment listviewFragment;
@@ -71,16 +64,14 @@ public class HomeActivity extends AppCompatActivity {
 
         // Initialize the views in the layout
         toolbar = findViewById(R.id.toolbar);
-        privateButton = findViewById(R.id.privateButton);
-        sharedButton = findViewById(R.id.sharedButton);
-        publicButton = findViewById(R.id.publicButton);
-        navView = findViewById(R.id.navView);
-        fab = findViewById(R.id.fab);
-        fragmentContainer = findViewById(R.id.fragmentContainer);
+        privateButton = findViewById(R.id.homePrivateButton);
+        sharedButton = findViewById(R.id.homeSharedButton);
+        publicButton = findViewById(R.id.homePublicButton);
+        navView = findViewById(R.id.homeBottomNavView);
+        fab = findViewById(R.id.homeCreateEntryButton);
 
         // Initialize other member variables
         fragmentManager = getSupportFragmentManager();
-        // Create fragments
         listviewFragment = new ListviewFragment();
         mapviewFragment = new MapviewFragment();
         viewModelProvider = new ViewModelProvider(this);
@@ -171,7 +162,7 @@ public class HomeActivity extends AppCompatActivity {
             ft.show(listviewFragment);
         }
         else { // fragment needs to be added to frame container
-            ft.add(R.id.fragmentContainer, listviewFragment, "listViewFragment");
+            ft.add(R.id.homeFragmentContainer, listviewFragment, "listViewFragment");
         }
         // Hide mapviewFragment
         if (mapviewFragment.isAdded()) {
@@ -187,7 +178,7 @@ public class HomeActivity extends AppCompatActivity {
             ft.show(mapviewFragment);
         }
         else { // fragment needs to be added to frame container
-            ft.add(R.id.fragmentContainer, mapviewFragment, "mapViewFragment");
+            ft.add(R.id.homeFragmentContainer, mapviewFragment, "mapViewFragment");
         }
         // Hide listviewFragment
         if (listviewFragment.isAdded()) {

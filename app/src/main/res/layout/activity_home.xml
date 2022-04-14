@@ -1,96 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-    <RelativeLayout
-        android:id="@+id/homeRelativeLayout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/homeRelativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentBottom="true"
+    tools:context=".HomeActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        tools:context=".HomeActivity">
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.InteractiveDiary.AppBarOverlay">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/Theme.InteractiveDiary.AppBarOverlay">
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/Theme.InteractiveDiary.PopupOverlay" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/Theme.InteractiveDiary.PopupOverlay" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <RelativeLayout
-            android:id="@+id/entryTypeRelativeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/appBarLayout">
+    <RelativeLayout
+        android:id="@+id/homeEntryTypeRelativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/appBarLayout">
 
 
-            <Button
-                android:id="@+id/privateButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/privateTab"
-                app:icon="@drawable/ic_baseline_person_24" />
-
-            <Button
-                android:id="@+id/sharedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/privateButton"
-                android:text="@string/sharedTab"
-                app:icon="@drawable/ic_baseline_people_24" />
-
-            <Button
-                android:id="@+id/publicButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/sharedButton"
-                android:text="@string/publicTab"
-                app:icon="@drawable/ic_baseline_public_24" />
-        </RelativeLayout>
-
-        <FrameLayout
-            android:id="@+id/fragmentContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/navView"
-            android:layout_below="@id/entryTypeRelativeLayout"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
+        <Button
+            android:id="@+id/homePrivateButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/navView"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginBottom="16dp"
-            android:contentDescription="@string/createEntry"
-            app:srcCompat="@drawable/ic_outline_add_24" />
+            android:text="@string/privateTab"
+            app:icon="@drawable/ic_baseline_person_24" />
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navView"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/homeSharedButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="0dp"
-            android:layout_marginEnd="0dp"
-            android:background="?android:attr/windowBackground"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:menu="@menu/bottom_nav_menu" />
+            android:layout_toRightOf="@id/homePrivateButton"
+            android:text="@string/sharedTab"
+            app:icon="@drawable/ic_baseline_people_24" />
 
+        <Button
+            android:id="@+id/homePublicButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/homeSharedButton"
+            android:text="@string/publicTab"
+            app:icon="@drawable/ic_baseline_public_24" />
     </RelativeLayout>
-</layout>
+
+    <FrameLayout
+        android:id="@+id/homeFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/homeBottomNavView"
+        android:layout_below="@id/homeEntryTypeRelativeLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/homeCreateEntryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/homeBottomNavView"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/createEntry"
+        app:srcCompat="@drawable/ic_outline_add_24" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/homeBottomNavView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:background="?android:attr/windowBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+</RelativeLayout>
