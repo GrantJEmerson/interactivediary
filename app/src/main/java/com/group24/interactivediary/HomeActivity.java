@@ -17,7 +17,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
@@ -25,13 +24,10 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.group24.interactivediary.databinding.ActivityHomeBinding;
 import com.group24.interactivediary.ui.listview.ListviewFragment;
 import com.group24.interactivediary.ui.listview.ListviewViewModel;
-import com.group24.interactivediary.ui.mapview.MapviewFragment;
 import com.group24.interactivediary.ui.mapview.MapviewViewModel;
 
 import android.view.Menu;
 import android.view.MenuItem;
-
-import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity {
     public static final String TAG = "HomeActivity";
@@ -41,8 +37,9 @@ public class HomeActivity extends AppCompatActivity {
     private int[] tabIcons = {R.drawable.ic_baseline_person_24, R.drawable.ic_baseline_people_24, R.drawable.ic_baseline_public_24};
 
     private Fragment curFragment;
-    private ListviewAdapter listviewAdapter;
-    private MapviewAdapter mapviewAdapter;
+    private ViewModelProvider viewModelProvider;
+    private ListviewViewModel listviewViewModel;
+    private MapviewViewModel mapviewViewModel;
 
     // Views in the layout
     private TabLayout entryTypeTabLayout;
@@ -57,9 +54,6 @@ public class HomeActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.toolbar);
 
-        listviewAdapter = new ListviewAdapter(this);
-        mapviewAdapter = new MapviewAdapter(this);
-
         // Set up the bottom nav bar
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -69,6 +63,11 @@ public class HomeActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+        binding.navView.setOnItemSelectedListener(item -> {
+            Log.e(TAG, item.toString());
+            updateCurFragment();
+            return true;
+        });
 
         // Set up the top nav bar
         entryTypeTabLayout = binding.entryTypeTabLayout;
@@ -76,16 +75,13 @@ public class HomeActivity extends AppCompatActivity {
 
         // Get the viewModels of the current instances of listview and mapview fragments
         NavBackStackEntry backStackEntry = navController.getBackStackEntry(R.id.bottom_nav);
-        ViewModelProvider viewModelProvider = new ViewModelProvider(backStackEntry);
-        ListviewViewModel listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
-        MapviewViewModel mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
+        viewModelProvider = new ViewModelProvider(backStackEntry);
+        listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
+        Log.e(TAG, listviewViewModel.toString());
+        mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
+        Log.e(TAG, mapviewViewModel.toString());
 
-        // Find current fragment being displayed
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_home);
-        curFragment = navHostFragment.getChildFragmentManager().getFragments().get(0);
-        // Set adapter to viewpager
-        if (curFragment.getClass().equals(ListviewFragment.class)) entryTypeViewPager.setAdapter(listviewAdapter);
-        else entryTypeViewPager.setAdapter(mapviewAdapter);
+        updateCurFragment();
 
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(entryTypeTabLayout, entryTypeViewPager, new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
@@ -94,8 +90,8 @@ public class HomeActivity extends AppCompatActivity {
                 tab.setIcon(tabIcons[position]);
                 Log.e(TAG, "listviewViewModel.select(" + position + ");");
                 Log.e(TAG, "mapviewViewModel.select(" + position + ");");
-                listviewViewModel.select(position);
-                mapviewViewModel.select(position);
+                listviewViewModel.setEntryType(position);
+                mapviewViewModel.setEntryType(position);
             }
         });
         tabLayoutMediator.attach();
@@ -137,35 +133,24 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private class ListviewAdapter extends FragmentStateAdapter {
-        public ListviewAdapter(AppCompatActivity activity) {
-            super(activity);
+    private void updateCurFragment() {
+        // Find current fragment being displayed
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_home);
+        curFragment = navHostFragment.getChildFragmentManager().getFragments().get(0);
+        Log.e(TAG, navHostFragment.getChildFragmentManager().getFragments().size() + " " + navHostFragment.getChildFragmentManager().getFragments().toString());
+        Log.e(TAG, curFragment.getClass().getCanonicalName());
+        // Set adapter to viewpager
+        if (curFragment.getClass().equals(ListviewFragment.class)) {
+            if (listviewViewModel.getListviewAdapter() == null) {
+                listviewViewModel.setListviewAdapter(new ListviewAdapter(this));
+            }
+            entryTypeViewPager.setAdapter(listviewViewModel.getListviewAdapter());
         }
-
-        @Override
-        public Fragment createFragment(int position) {
-            return new ListviewFragment();
-        }
-
-        @Override
-        public int getItemCount() {
-            return 3;
-        }
-    }
-
-    private class MapviewAdapter extends FragmentStateAdapter {
-        public MapviewAdapter(AppCompatActivity activity) {
-            super(activity);
-        }
-
-        @Override
-        public Fragment createFragment(int position) {
-            return new MapviewFragment();
-        }
-
-        @Override
-        public int getItemCount() {
-            return 3;
+        else {
+            if (mapviewViewModel.getMapviewAdapter() == null) {
+                mapviewViewModel.setMapviewAdapter(new MapviewAdapter(this));
+            }
+            entryTypeViewPager.setAdapter(mapviewViewModel.getMapviewAdapter());
         }
     }
 }

@@ -26,7 +26,7 @@ public class MapviewFragment extends Fragment {
         View root = binding.getRoot();
 
         final TextView textView = binding.textviewMapview;
-        mapviewViewModel.getSelected().observe(getViewLifecycleOwner(), entryType -> {
+        mapviewViewModel.getEntryType().observe(getViewLifecycleOwner(), entryType -> {
             switch (entryType) {
                 case 0: // private
                     textView.setText("viewing map view for private entries");

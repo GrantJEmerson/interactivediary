@@ -26,7 +26,7 @@ public class ListviewFragment extends Fragment {
         View root = binding.getRoot();
 
         final TextView textView = binding.textviewListview;
-        listviewViewModel.getSelected().observe(getViewLifecycleOwner(), entryType -> {
+        listviewViewModel.getEntryType().observe(getViewLifecycleOwner(), entryType -> {
             switch (entryType) {
                 case 0: // private
                     textView.setText("viewing list view for private entries");
