@@ -20,6 +20,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.group24.interactivediary.model.Entry;
+import com.group24.interactivediary.networking.EntryManager;
 import com.group24.interactivediary.ui.listview.ListviewFragment;
 import com.group24.interactivediary.ui.listview.ListviewViewModel;
 import com.group24.interactivediary.ui.mapview.MapviewFragment;
@@ -30,6 +32,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     public static final String TAG = "HomeActivity";
@@ -57,6 +61,8 @@ public class HomeActivity extends AppCompatActivity {
     private ViewModelProvider viewModelProvider;
     private ListviewViewModel listviewViewModel;
     private MapviewViewModel mapviewViewModel;
+    private EntryManager entryManager;
+    private List<Entry> entries;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +86,11 @@ public class HomeActivity extends AppCompatActivity {
         viewModelProvider = new ViewModelProvider(this);
         listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
         mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
+        entryManager = new EntryManager(getApplicationContext());
+
+        entryManager.fetchEntries(Entry.Visibility.PRIVATE, Entry.Ordering.DATE_DESCENDING, null, (entries) -> {
+            this.entries = entries;
+        });
 
         // Set up toolbar
         setSupportActionBar(toolbar);
