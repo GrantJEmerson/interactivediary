@@ -39,4 +39,19 @@
     <string name="title_is_empty">You need to give your entry a title!</string>
     <string name="text_is_empty">You need to give your entry some text!</string>
     <string name="entry_type_is_empty">You need to indicate if your entry should be private, public, or shared!</string>
+    <string name="title_activity_entry_details">Entry Details</string>
+    <string name="nothing_here_yet">Nothing here yet...</string>
+    <string name="private_nothing_here_yet">Private Entries: Nothing here yet!</string>
+    <string name="shared_nothing_here_yet">Shared Entries: Nothing here yet!</string>
+    <string name="public_nothing_here_yet">Public Entries: Nothing here yet!</string>
+    <string name="logging_out">Logging out...</string>
+    <string name="logout_failed">Logout failed, please try again!</string>
+    <string name="Profile">Profile</string>
+    <string name="Logout">Logout</string>
+    <string name="dots">•••••••</string>
+    <string name="notifications">Notifications</string>
+    <string name="title_activity_profile">Profile</string>
+    <string name="failed_to_save_user_settings">Failed to save user settings, please try again.</string>
+    <string name="you_will_receive_notifications">You will now receive notifications.</string>
+    <string name="you_will_not_receive_notifications">You will no longer receive notifications.</string>
 </resources>

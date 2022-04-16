@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.group24.interactivediary">
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -14,15 +15,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.InteractiveDiary">
         <activity
-            android:name=".EntryDetailsActivity"
-            android:exported="false" />
+            android:name=".activities.ProfileActivity"
+            android:exported="false"
+            android:label="@string/title_activity_profile"
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
         <activity
-            android:name=".EntryCreateActivity"
+            android:name=".activities.EntryDetailsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_entry_details"
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
+        <activity
+            android:name=".activities.EntryCreateActivity"
             android:exported="false"
             android:label="@string/title_activity_entry_create"
             android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
         <activity
-            android:name=".LoginSignupActivity"
+            android:name=".activities.LoginSignupActivity"
             android:exported="true"
             android:label="@string/title_activity_login_signup"
             android:theme="@style/Theme.InteractiveDiary.NoActionBar">
@@ -33,7 +41,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HomeActivity"
+            android:name=".activities.HomeActivity"
             android:exported="true"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
