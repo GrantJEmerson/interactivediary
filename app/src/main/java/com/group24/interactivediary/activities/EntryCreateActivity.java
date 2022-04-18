@@ -3,9 +3,15 @@ package com.group24.interactivediary.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +29,7 @@ import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.R;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -46,6 +53,7 @@ public class EntryCreateActivity extends AppCompatActivity {
 
     // Other necessary member variables
     Entry entry;
+    LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,7 @@ public class EntryCreateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry_create);
 
         // Initialize the views in the layout
+        relativeLayout = findViewById(R.id.entryCreateRelativeLayout);
         toolbar = findViewById(R.id.toolbar);
         titleEditText = findViewById(R.id.entryCreateTitleEditText);
         mediaCardView = findViewById(R.id.entryCreateMediaCardView);
@@ -109,14 +118,18 @@ public class EntryCreateActivity extends AppCompatActivity {
                     return;
                 }
 
+                Location location = getCurrentUserLocation();
+                ParseGeoPoint geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+
+                // Put all the information together
                 entry.setTitle(title);
                 entry.setAuthor(ParseUser.getCurrentUser());
+                entry.setContributors(contributors);
                 entry.setText(text);
                 entry.setMediaItems(mediaItems);
                 entry.setMediaItemDescriptions(mediaItemDescriptions);
                 entry.setVisibility(visibility);
-                // entry.setLocation(location); TODO: figure out location
-                entry.setContributors(contributors);
+                entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");
                 entry.saveInBackground(new SaveCallback() {
                     @Override
@@ -202,5 +215,15 @@ public class EntryCreateActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private Location getCurrentUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (locationManager == null) {
+                locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            }
+        }
+        return null;
     }
 }

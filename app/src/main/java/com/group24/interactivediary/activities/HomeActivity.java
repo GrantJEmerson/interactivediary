@@ -1,15 +1,27 @@
 package com.group24.interactivediary.activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -29,12 +41,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class HomeActivity extends AppCompatActivity {
     public static final String TAG = "HomeActivity";
 
-    private String[] tabTitles = {"Private", "Shared", "Public"};
-    private int[] tabIcons = {R.drawable.ic_baseline_person_24, R.drawable.ic_baseline_people_24, R.drawable.ic_baseline_public_24};
+    public static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 368643; // just an arbitrary number
+
+    private static final String[] tabTitles = {"Private", "Shared", "Public"};
+    private static final int[] tabIcons = {R.drawable.ic_baseline_person_24, R.drawable.ic_baseline_people_24, R.drawable.ic_baseline_public_24};
 
     // Views in the layout
     private RelativeLayout relativeLayout;
@@ -52,6 +67,8 @@ public class HomeActivity extends AppCompatActivity {
     private ViewModelProvider viewModelProvider;
     private ListviewViewModel listviewViewModel;
     private MapviewViewModel mapviewViewModel;
+    private LocationManager locationManager;
+    private Location location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -243,5 +260,78 @@ public class HomeActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    // Called when the user is performing an action which requires the app to access the user's location
+    public void getPermissionToAccessFineLocation() {
+        // 1) Use the support library version ContextCompat.checkSelfPermission(...) to avoid
+        // checking the build version since Context.checkSelfPermission(...) is only available
+        // in Marshmallow
+        // 2) Always check for permission (even if permission has already been granted)
+        // since the user can revoke permissions at any time through Settings
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // The permission is NOT already granted.
+            // Check if the user has been asked about this permission already and denied
+            // it. If so, we want to give more explanation about why the permission is needed.
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show our own UI to explain to the user why we need to access location
+                // before actually requesting the permission and showing the default UI
+
+                ifNoLocationPermission();
+            }
+
+            // Fire off an async request to actually get the permission
+            // This will show the standard permission request dialog UI
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST);
+        }
+        else {
+            location = getCurrentUserLocation();
+        }
+    }
+
+    // Callback with the request from calling requestPermissions(...)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        // Make sure it's our original ACCESS_FINE_LOCATION request
+        if (requestCode == ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST) {
+            // Permission has been granted
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, getResources().getText(R.string.location_permissions_granted), Toast.LENGTH_SHORT).show();
+
+                // Get location
+                location = getCurrentUserLocation();
+            }
+            // Permission has been denied
+            else {
+                // showRationale = false if user clicks Never Ask Again, otherwise true
+                boolean showRationale = shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
+
+                if (showRationale) {
+                    ifNoLocationPermission();
+                }
+                else {
+                    Toast.makeText(this, getResources().getText(R.string.location_permissions_denied), Toast.LENGTH_SHORT).show();
+                }
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private Location getCurrentUserLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (locationManager == null) {
+                locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+            }
+        }
+        return null;
+    }
+
+    private void ifNoLocationPermission() {
+        // TODO: toast saying we need location permissions to order or search by location
+        // set whatever menu to previous state (if ordering menu set to "nearest", set to whatever it was before,
+        // if search menu set to search by location, set to whatever it was before)
     }
 }

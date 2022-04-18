@@ -20,12 +20,14 @@ import com.group24.interactivediary.EndlessRecyclerViewScrollListener;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.adapters.EntryAdapter;
 import com.group24.interactivediary.R;
+import com.group24.interactivediary.models.Search;
 import com.group24.interactivediary.networking.EntryManager;
 import com.group24.interactivediary.networking.FetchCallback;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ListviewFragment extends Fragment {
@@ -64,7 +66,7 @@ public class ListviewFragment extends Fragment {
         entries = new ArrayList<>();
         entryAdapter = new EntryAdapter(requireActivity(), entries);
         linearLayoutManager = new LinearLayoutManager(requireActivity());
-        entryManager = new EntryManager(requireActivity(), entryAdapter, nothingHereYet);
+        entryManager = new EntryManager(requireActivity());
 
         // Set up nothingHereYet TextView
         listviewViewModel.getNothingHereYetText().observe(getViewLifecycleOwner(), nothingHereYet::setText);
@@ -76,7 +78,7 @@ public class ListviewFragment extends Fragment {
         listviewViewModel.getVisibility().observe(getViewLifecycleOwner(), new Observer<Entry.Visibility>() {
             @Override
             public void onChanged(Entry.Visibility visibility) {
-                Log.e(TAG, "we detected that visibility has changed to " + visibility);
+                Log.e(TAG, "onChanged called");
                 populateHomeTimeline(visibility);
             }
         });
@@ -85,7 +87,7 @@ public class ListviewFragment extends Fragment {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 Log.e(TAG, "onLoadMore called");
-                populateHomeTimeline(listviewViewModel.getVisibility().getValue());
+                loadMorePosts(listviewViewModel.getVisibility().getValue());
             }
         });
 
@@ -94,7 +96,6 @@ public class ListviewFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                // if something goes wrong try adding swipeRefreshLayout.setRefreshing(false)
                 Log.e(TAG, "onRefresh called");
                 populateHomeTimeline(listviewViewModel.getVisibility().getValue());
             }
@@ -115,9 +116,28 @@ public class ListviewFragment extends Fragment {
 
     private void populateHomeTimeline(Entry.Visibility visibility) {
         // TODO: add other query options depending on user preferences
-        Log.e(TAG, "populateHomeTimeline(" + visibility + ") called");
-        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, null, entries -> {
-            Log.e(TAG, "QUERIED SUCCESSFULLY");
+        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, null, null, entriesFound -> {
+            // Clear out old items before appending in the new ones
+            entryAdapter.clear();
+            // Save received posts to list and notify adapter of new data
+            entryAdapter.addAll(entriesFound);
+            // Show empty message if gallery is empty
+            if (entryAdapter.getItemCount() == 0) nothingHereYet.setVisibility(View.VISIBLE);
+            else nothingHereYet.setVisibility(View.GONE);
         });
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    private void loadMorePosts(Entry.Visibility visibility) {
+        // TODO: add other query options depending on user preferences
+        Date latestEntry = entries.get(entries.size()-1).getUpdatedAt();
+        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, null, latestEntry, entriesFound -> {
+            // Save received posts to list and notify adapter of new data
+            entryAdapter.addAll(entriesFound);
+            // Show empty message if gallery is empty
+            if (entryAdapter.getItemCount() == 0) nothingHereYet.setVisibility(View.VISIBLE);
+            else nothingHereYet.setVisibility(View.GONE);
+        });
+        swipeRefreshLayout.setRefreshing(false);
     }
 }

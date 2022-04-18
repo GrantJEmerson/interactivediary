@@ -56,6 +56,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry_details);
 
         // Initialize the views in the layout
+        relativeLayout = findViewById(R.id.entryDetailsRelativeLayout);
         toolbar = findViewById(R.id.toolbar);
         titleTextView = findViewById(R.id.entryDetailsTitleTextView);
         authorTextView = findViewById(R.id.entryDetailsAuthorTextView);

@@ -3,6 +3,7 @@
     package="com.group24.interactivediary">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -18,22 +19,26 @@
             android:name=".activities.ProfileActivity"
             android:exported="false"
             android:label="@string/title_activity_profile"
-            android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar"
+            android:foregroundServiceType="location" />
         <activity
             android:name=".activities.EntryDetailsActivity"
             android:exported="false"
             android:label="@string/title_activity_entry_details"
-            android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar"
+            android:foregroundServiceType="location" />
         <activity
             android:name=".activities.EntryCreateActivity"
             android:exported="false"
             android:label="@string/title_activity_entry_create"
-            android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar"
+            android:foregroundServiceType="location" />
         <activity
             android:name=".activities.LoginSignupActivity"
             android:exported="true"
             android:label="@string/title_activity_login_signup"
-            android:theme="@style/Theme.InteractiveDiary.NoActionBar">
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar"
+            android:foregroundServiceType="location" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,7 +49,8 @@
             android:name=".activities.HomeActivity"
             android:exported="true"
             android:label="@string/title_activity_home"
-            android:theme="@style/Theme.InteractiveDiary.NoActionBar" />
+            android:theme="@style/Theme.InteractiveDiary.NoActionBar"
+            android:foregroundServiceType="location" />
 
         <meta-data
             android:name="com.parse.SERVER_URL"
