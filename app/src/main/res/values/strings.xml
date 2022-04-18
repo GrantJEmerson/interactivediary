@@ -57,4 +57,5 @@
     <string name="we_need_location_permissions_for_mapview">We need permission to access your location in order to use Map View.</string>
     <string name="location_permissions_granted">Location permissions granted.</string>
     <string name="location_permissions_denied">Location permissions denied.</string>
+    <string name="search_hint">Search entries...</string>
 </resources>

@@ -111,7 +111,8 @@ public class EntryManager {
                     entryQuery.whereContains(Entry.KEY_TITLE, (String) search.searchParameter);
                     break;
                 case DATE:
-                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT, (Date) search.searchParameter);
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_DAY, ((Date) search.searchParameter).getDay());
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_MONTH, ((Date) search.searchParameter).getMonth());
                     break;
                 case LOCATION:
                     Location searchLocation = (Location) search.searchParameter;

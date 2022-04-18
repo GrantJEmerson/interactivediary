@@ -34,6 +34,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class EntryCreateActivity extends AppCompatActivity {
@@ -121,6 +122,8 @@ public class EntryCreateActivity extends AppCompatActivity {
                 Location location = getCurrentUserLocation();
                 ParseGeoPoint geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
 
+                Date currentDate = new Date();
+
                 // Put all the information together
                 entry.setTitle(title);
                 entry.setAuthor(ParseUser.getCurrentUser());
@@ -129,6 +132,8 @@ public class EntryCreateActivity extends AppCompatActivity {
                 entry.setMediaItems(mediaItems);
                 entry.setMediaItemDescriptions(mediaItemDescriptions);
                 entry.setVisibility(visibility);
+                entry.setUpdatedAtDay(currentDate.getDay());
+                entry.setUpdatedAtMonth(currentDate.getMonth());
                 entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");
                 entry.saveInBackground(new SaveCallback() {

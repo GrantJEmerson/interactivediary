@@ -5,6 +5,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.group24.interactivediary.EndlessRecyclerViewScrollListener;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.adapters.EntryAdapter;
@@ -35,17 +40,21 @@ public class ListviewFragment extends Fragment {
 
     // Views in the layout
     TextView nothingHereYet;
+    SearchView searchView;
+    Spinner searchTypeSpinner;
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView recyclerView;
 
     // Other necessary member variables
     private ViewModelProvider viewModelProvider;
     private ListviewViewModel listviewViewModel;
+    private Search.SearchType searchType;
     private List<Entry> entries;
     private EntryAdapter entryAdapter;
     private LinearLayoutManager linearLayoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
     private EntryManager entryManager;
+    private Search search;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {// Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_listview, container, false);
@@ -57,6 +66,8 @@ public class ListviewFragment extends Fragment {
 
         // Initialize the views in the layout
         nothingHereYet = view.findViewById(R.id.listviewNothingHereYet);
+        searchView = view.findViewById(R.id.listviewSearchView);
+        searchTypeSpinner = view.findViewById(R.id.listviewSearchTypeSpinner);
         swipeRefreshLayout = view.findViewById(R.id.listviewSwipeRefreshLayout);
         recyclerView = view.findViewById(R.id.listviewRecyclerView);
 
@@ -67,6 +78,7 @@ public class ListviewFragment extends Fragment {
         entryAdapter = new EntryAdapter(requireActivity(), entries);
         linearLayoutManager = new LinearLayoutManager(requireActivity());
         entryManager = new EntryManager(requireActivity());
+        search = null;
 
         // Set up nothingHereYet TextView
         listviewViewModel.getNothingHereYetText().observe(getViewLifecycleOwner(), nothingHereYet::setText);
@@ -74,6 +86,66 @@ public class ListviewFragment extends Fragment {
         // Set up recycler view
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(entryAdapter);
+
+        // Set up search view
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) searchTypeSpinner.setVisibility(View.VISIBLE);
+                else searchTypeSpinner.setVisibility(View.GONE);
+
+            }
+        });
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                search = new Search(searchType, query) {};
+                populateHomeTimeline(listviewViewModel.getVisibility().getValue());
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                search = null;
+                populateHomeTimeline(listviewViewModel.getVisibility().getValue());
+
+                return false;
+            }
+        });
+
+        // Set up search type spinner
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> searchTypeAdapter = ArrayAdapter.createFromResource(requireActivity(), R.array.search_type_array, R.layout.spinner_item);
+        // Specify the layout to use when the list of choices appears
+        searchTypeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        searchTypeSpinner.setAdapter(searchTypeAdapter);
+        // Set it to the default value
+        searchTypeSpinner.setSelection(0);
+
+        searchTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedSearchType = getResources().getStringArray(R.array.search_type_array)[position];
+
+                if (selectedSearchType.equals("Title")) searchType = Search.SearchType.TITLE;
+                else if (selectedSearchType.equals("Date")) searchType = Search.SearchType.DATE;
+                else searchType = Search.SearchType.LOCATION;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Just search by title by default
+                searchType = Search.SearchType.TITLE;
+            }
+        });
 
         listviewViewModel.getVisibility().observe(getViewLifecycleOwner(), new Observer<Entry.Visibility>() {
             @Override
@@ -116,7 +188,7 @@ public class ListviewFragment extends Fragment {
 
     private void populateHomeTimeline(Entry.Visibility visibility) {
         // TODO: add other query options depending on user preferences
-        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, null, null, entriesFound -> {
+        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, search, null, entriesFound -> {
             // Clear out old items before appending in the new ones
             entryAdapter.clear();
             // Save received posts to list and notify adapter of new data
@@ -131,7 +203,7 @@ public class ListviewFragment extends Fragment {
     private void loadMorePosts(Entry.Visibility visibility) {
         // TODO: add other query options depending on user preferences
         Date latestEntry = entries.get(entries.size()-1).getUpdatedAt();
-        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, null, latestEntry, entriesFound -> {
+        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_ASCENDING, search, latestEntry, entriesFound -> {
             // Save received posts to list and notify adapter of new data
             entryAdapter.addAll(entriesFound);
             // Show empty message if gallery is empty
