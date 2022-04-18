@@ -1,4 +1,4 @@
-package com.group24.interactivediary.ui.mapview;
+package com.group24.interactivediary.fragments.mapview;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

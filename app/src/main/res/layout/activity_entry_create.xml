@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:layout_alignParentEnd="true"
     android:layout_alignParentBottom="true"
-    tools:context=".EntryCreateActivity">
+    tools:context=".activities.EntryCreateActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"

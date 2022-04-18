@@ -1,7 +1,9 @@
-package com.group24.interactivediary;
+package com.group24.interactivediary.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.group24.interactivediary.R;
+import com.group24.interactivediary.activities.EntryDetailsActivity;
+import com.group24.interactivediary.models.Entry;
 import com.parse.ParseFile;
 
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +60,7 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
-    // Add a list of items -- change to type used
+    // Add a list of items
     public void addAll(List<Entry> list) {
         entries.addAll(list);
         notifyDataSetChanged();
@@ -80,9 +85,9 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.ViewHolder> 
         }
 
         public void bind(Entry entry) {
-            ArrayList<ParseFile> mediaItems = entry.getMediaItems();
-            if (!mediaItems.isEmpty()) {
-                ParseFile first = mediaItems.get(0);
+            List<List> mediaItemsLists = entry.getMediaItems();
+            if (!mediaItemsLists.get(0).isEmpty()) {
+                Bitmap first = ((Pair<Bitmap, String>) mediaItemsLists.get(0)).first;
                 Glide.with(context)
                         .load(first)
                         .circleCrop()

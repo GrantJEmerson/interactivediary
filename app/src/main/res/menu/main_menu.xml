@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.doodle.activities.HomeActivity">
+
+    <item
+        android:id="@+id/username"
+        android:title=""
+        app:showAsAction="always|withText" />
+
+    <item
+        android:id="@+id/profileMenuItem"
+        android:title="@string/Profile"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/logoutMenuItem"
+        android:title="@string/Logout"
+        app:showAsAction="never" />
+
+</menu>

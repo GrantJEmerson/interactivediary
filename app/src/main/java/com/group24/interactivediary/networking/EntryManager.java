@@ -5,11 +5,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 
-import com.group24.interactivediary.model.Entry;
-import com.group24.interactivediary.model.Search;
+import com.group24.interactivediary.adapters.EntryAdapter;
+import com.group24.interactivediary.models.Entry;
+import com.group24.interactivediary.models.Search;
 import com.parse.*;
 
 import java.util.ArrayList;
@@ -18,56 +22,61 @@ import java.util.Date;
 import java.util.List;
 
 public class EntryManager {
+    public static final String TAG = "EntryManager";
 
     String userID;
     Context context;
     LocationManager locationManager;
+    EntryAdapter entryAdapter;
+    TextView nothingHereYet;
 
-    public EntryManager(Context context) {
+    public EntryManager(Context context, EntryAdapter entryAdapter, TextView nothingHereYet) {
         this.context = context;
         userID = ParseUser.getCurrentUser().getObjectId();
+        this.entryAdapter = entryAdapter;
+        this.nothingHereYet = nothingHereYet;
     }
 
     public void fetchEntries(Entry.Visibility visibility, Entry.Ordering ordering, Search search, final FetchCallback<List<Entry>> callback) {
-        ParseQuery<ParseObject> entryQuery;
+        ParseQuery<Entry> entryQuery;
 
         switch (visibility) {
             case PRIVATE:
-                entryQuery = new ParseQuery<>("Entry");
-                entryQuery.whereEqualTo("author", userID);
-                entryQuery.whereEqualTo("visibility", "PRIVATE");
+                entryQuery = new ParseQuery<>(Entry.TAG);
+                entryQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+                entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, "PRIVATE");
                 break;
             case SHARED:
-                ParseQuery<ParseObject> contributorQuery = new ParseQuery<>("Entry");
-                contributorQuery.whereContains("contributors", userID);
-                contributorQuery.whereEqualTo("visibility", "SHARED");
+                ParseQuery<Entry> contributorQuery = new ParseQuery<>(Entry.TAG);
+                contributorQuery.whereContains(Entry.KEY_CONTRIBUTORS, userID);
+                contributorQuery.whereEqualTo(Entry.KEY_VISIBILITY, "SHARED");
 
-                ParseQuery<ParseObject> authorQuery = new ParseQuery<>("Entry");
-                authorQuery.whereEqualTo("author", userID);
-                authorQuery.whereEqualTo("visibility", "SHARED");
+                ParseQuery<Entry> authorQuery = new ParseQuery<>(Entry.TAG);
+                authorQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+                authorQuery.whereEqualTo(Entry.KEY_VISIBILITY, "SHARED");
 
-                List<ParseQuery<ParseObject>> queries = Arrays.asList(contributorQuery, authorQuery);
+                List<ParseQuery<Entry>> queries = Arrays.asList(contributorQuery, authorQuery);
                 entryQuery = ParseQuery.or(queries);
                 break;
             case PUBLIC:
             default:
-                entryQuery = new ParseQuery<>("Entry");
-                entryQuery.whereEqualTo("visibility", "PUBLIC");
+                entryQuery = new ParseQuery<>(Entry.TAG);
+                entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, "PUBLIC");
                 break;
         }
 
         switch (ordering) {
             case TITLE_ASCENDING:
-                entryQuery.addAscendingOrder("title");
+                entryQuery.addAscendingOrder(Entry.KEY_TITLE);
                 break;
             case TITLE_DESCENDING:
-                entryQuery.addDescendingOrder("title");
+                entryQuery.addDescendingOrder(Entry.KEY_TITLE);
                 break;
             case DATE_ASCENDING:
-                entryQuery.addAscendingOrder("updatedAt");
+                entryQuery.addAscendingOrder(Entry.KEY_UPDATED_AT);
                 break;
             case DATE_DESCENDING:
-                entryQuery.addDescendingOrder("updatedAt");
+                entryQuery.addDescendingOrder(Entry.KEY_UPDATED_AT);
                 break;
             case NEAREST:
                 Location userCurrentLocation = getCurrentUserLocation();
@@ -76,27 +85,27 @@ public class EntryManager {
                     geoPoint.setLatitude(userCurrentLocation.getLatitude());
                     geoPoint.setLongitude(userCurrentLocation.getLongitude());
 
-                    entryQuery.whereNear("location", geoPoint);
+                    entryQuery.whereNear(Entry.KEY_LOCATION, geoPoint);
 
                     break;
                 }
             default:
-                entryQuery.addDescendingOrder("updatedAt");
+                entryQuery.addDescendingOrder(Entry.KEY_UPDATED_AT);
                 break;
         }
 
-        entryQuery.include("author");
-        entryQuery.include("comments");
-        entryQuery.include("contributors");
-        entryQuery.include("mediaItems");
+        entryQuery.include(Entry.KEY_AUTHOR);
+        entryQuery.include(Entry.KEY_CONTRIBUTORS);
+        entryQuery.include(Entry.KEY_MEDIA_ITEMS);
+        entryQuery.include(Entry.KEY_MEDIA_ITEM_DESCRIPTIONS);
 
         if (search != null) {
             switch (search.type) {
                 case TITLE:
-                    entryQuery.whereContains("title", (String) search.searchParameter);
+                    entryQuery.whereContains(Entry.KEY_TITLE, (String) search.searchParameter);
                     break;
                 case DATE:
-                    entryQuery.whereEqualTo("updatedAt", (Date) search.searchParameter);
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT, (Date) search.searchParameter);
                     break;
                 case LOCATION:
                     Location searchLocation = (Location) search.searchParameter;
@@ -105,23 +114,24 @@ public class EntryManager {
                     geoPoint.setLongitude(searchLocation.getLongitude());
                     geoPoint.setLatitude(searchLocation.getLatitude());
 
-                    entryQuery.whereWithinMiles("location", geoPoint, 20);
+                    entryQuery.whereWithinMiles(Entry.KEY_LOCATION, geoPoint, 20);
                     break;
             }
         }
 
-        entryQuery.findInBackground((objects, error) -> {
-            if (error == null) {
-                List<Entry> entries = new ArrayList<>();
+        entryQuery.findInBackground((entriesFound, e) -> {
+            if (e == null) {
+                // Clear out old items before appending in the new ones
+                entryAdapter.clear();
+                // Save received posts to list and notify adapter of new data
+                entryAdapter.addAll(entriesFound);
+                // Show empty message if gallery is empty
+                if (entriesFound.size() == 0) nothingHereYet.setVisibility(View.VISIBLE);
+                else nothingHereYet.setVisibility(View.GONE);
 
-                for (ParseObject object : objects) {
-                    Entry entry = new Entry(object);
-                    entries.add(entry);
-                }
-
-                callback.done(entries);
+                callback.done(entriesFound);
             } else {
-                System.out.println("Error fetching entries: " + error.getLocalizedMessage());
+                Log.e(TAG, "Error fetching entries: " + e.getLocalizedMessage());
             }
         });
     }
