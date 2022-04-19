@@ -2,14 +2,12 @@
     <string name="app_name">Interactive Diary</string>
     <string name="action_settings">Settings</string>
 
-    <string name="hello_listview_fragment">Hello listview fragment</string>
-    <string name="hello_mapview_fragment">Hello mapview fragment</string>
-
     <string name="back4app_server_url">https://parseapi.back4app.com/</string>
     <string name="back4app_app_id">a1GOMzUlyS5WAqPeVS9H8GIlV3UAPMZmKHyK34hS</string>
     <string name="back4app_client_key">B8jfg6uotkxVlfupUwhrnfVOcVbAKQihKXVVr1HX</string>
-    <string name="title_activity_login_signup">LoginSignupActivity</string>
+    <string name="google_maps_api_key">AIzaSyAdqtjnD8q6tp23pD0DJTXhVu6Ba_1yyJQ</string>
 
+    <string name="title_activity_login_signup">LoginSignupActivity</string>
     <string name="Log_In">Log In</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
@@ -64,4 +62,6 @@
     <string name="location_permissions_granted">Location permissions granted.</string>
     <string name="location_permissions_denied">Location permissions denied.</string>
     <string name="search_hint">Search entries...</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

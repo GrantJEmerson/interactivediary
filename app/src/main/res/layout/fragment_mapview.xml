@@ -17,4 +17,10 @@
         android:text="@string/we_need_location_permissions_for_mapview"
         android:visibility="gone"
         tools:visibility="visible" />
+
+    <fragment
+        android:id="@+id/mapView"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

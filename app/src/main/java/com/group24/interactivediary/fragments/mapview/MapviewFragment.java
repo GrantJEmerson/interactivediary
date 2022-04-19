@@ -1,11 +1,13 @@
 package com.group24.interactivediary.fragments.mapview;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +21,21 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.group24.interactivediary.R;
 
 import org.jetbrains.annotations.NotNull;
+
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class MapviewFragment extends Fragment {
     public static final String TAG = "MapviewFragment";
@@ -36,6 +50,8 @@ public class MapviewFragment extends Fragment {
     private MapviewViewModel mapviewViewModel;
     private LocationManager locationManager;
     private Location location;
+    private SupportMapFragment mapFragment;
+    private GoogleMap map;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {// Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_mapview, container, false);
@@ -52,14 +68,66 @@ public class MapviewFragment extends Fragment {
         viewModelProvider = new ViewModelProvider(requireActivity());
         mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
 
-        // Get permission to access location
-        getPermissionToAccessFineLocation();
-
+        setUpMapIfNeeded();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        displayLocation();
+    }
+
+    protected void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mapFragment == null) {
+            mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapView);
+            // Check if we were successful in obtaining the map.
+            if (mapFragment != null) {
+                mapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap map) {
+                        Log.e(TAG, "onMapReady called");
+                        loadMap(map);
+                        displayLocation();
+                        map.addMarker(new MarkerOptions()
+                                .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                                .title("Marker"));
+                    }
+                });
+            }
+            else {
+                Toast.makeText(requireActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // The Map is verified. It is now safe to manipulate the map.
+    protected void loadMap(GoogleMap googleMap) {
+        Log.e(TAG, "loadMap called");
+        if (googleMap != null) {
+            map = googleMap;
+            // Get permission to access location
+            getPermissionToAccessFineLocation();
+        }
+        else {
+            Toast.makeText(requireActivity(), "Error - Map was null!!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void displayLocation() {
+        Log.e(TAG, "displayLocation called");
+        if (location != null) {
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            map.setMyLocationEnabled(true);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+            map.animateCamera(cameraUpdate);
+        }
     }
 
     // Called when the user is performing an action which requires the app to access the user's location
@@ -119,13 +187,35 @@ public class MapviewFragment extends Fragment {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private Location getCurrentUserLocation() {
-        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        Log.e(TAG, "getCurrentUserLocation called");
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (locationManager == null) {
-                locationManager = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
-                return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             }
+            return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         }
         return null;
+        /*map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+
+        FusedLocationProviderClient locationClient = getFusedLocationProviderClient(requireActivity());
+        locationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location locationFound) {
+                        if (location != null) {
+                            location = locationFound;
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("MapDemoActivity", "Error trying to get last GPS location");
+                        e.printStackTrace();
+                    }
+                });*/
     }
 }

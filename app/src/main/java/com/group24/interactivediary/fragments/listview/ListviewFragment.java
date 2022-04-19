@@ -185,6 +185,7 @@ public class ListviewFragment extends Fragment {
                         break;
                     case 4:
                         sortType = Entry.Ordering.NEAREST;
+                        // TODO: request location?
                         break;
                     default:
                         sortType = Entry.Ordering.DATE_DESCENDING;
