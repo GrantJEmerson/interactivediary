@@ -25,6 +25,9 @@ import com.parse.ParseUser;
 
 import net.cachapa.expandablelayout.ExpandableLayout;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LoginSignupActivity extends AppCompatActivity {
     public static final String TAG = "LoginSignupActivity";
 
@@ -168,6 +171,22 @@ public class LoginSignupActivity extends AppCompatActivity {
 
     // Uses parse method signUpInBackground to attempt to sign up with the credentials given
     private void signupUser(String username, String password) {
+        // Validate username and password
+        Pattern specialCharPattern = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = specialCharPattern.matcher(username);
+        boolean usernameContainsSpecialCharacter = matcher.find();
+        if (usernameContainsSpecialCharacter) {  // Invalid Username
+            Snackbar.make(loginSignupRelativeLayout, getResources().getString(R.string.signup_failed_invalid_username), Snackbar.LENGTH_LONG).show();
+            loginExpandableLayout.startAnimation(shake);
+            return;
+        }
+
+        if (password.length() < 7) {  // Invalid Password
+            Snackbar.make(loginSignupRelativeLayout, getResources().getString(R.string.signup_failed_invalid_password), Snackbar.LENGTH_LONG).show();
+            loginExpandableLayout.startAnimation(shake);
+            return;
+        }
+
         // Create the ParseUser
         ParseUser user = new ParseUser();
         // Set core properties
