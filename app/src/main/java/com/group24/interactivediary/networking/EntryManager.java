@@ -13,6 +13,7 @@ import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.models.Search;
 import com.parse.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -21,19 +22,22 @@ import java.util.List;
 public class EntryManager {
     public static final String TAG = "EntryManager";
 
-    String userID;
     Context context;
     LocationManager locationManager;
 
     public EntryManager(Context context) {
         this.context = context;
-        userID = ParseUser.getCurrentUser().getObjectId();
     }
 
     public void deleteUsersEntries(final FetchCallback<Boolean> callback) {
+        ParseACL defaultACL = new ParseACL();
+        defaultACL.setPublicReadAccess(true);
+        defaultACL.setPublicWriteAccess(true);
+        ParseACL.setDefaultACL(defaultACL, true);
+
         ParseQuery<Entry> entryQuery;
         entryQuery = new ParseQuery<>(Entry.TAG);
-        entryQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+        entryQuery.whereEqualTo(Entry.KEY_AUTHOR, ParseUser.getCurrentUser());
 
         entryQuery.findInBackground((entriesFound, e) -> {
             if (e == null) {
@@ -69,21 +73,27 @@ public class EntryManager {
     public void fetchEntries(Entry.Visibility visibility, Entry.Ordering ordering, Search search, Date latestEntry, final FetchCallback<List<Entry>> callback) {
         ParseQuery<Entry> entryQuery;
 
+        ParseUser user = ParseUser.getCurrentUser();
+
         switch (visibility) {
             case PRIVATE:
                 Log.e(TAG, "querying for private entries");
                 entryQuery = new ParseQuery<>(Entry.TAG);
-                entryQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+                entryQuery.whereEqualTo(Entry.KEY_AUTHOR, user);
                 entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.PRIVATE.toString());
                 break;
             case SHARED:
                 Log.e(TAG, "querying for shared entries");
                 ParseQuery<Entry> contributorQuery = new ParseQuery<>(Entry.TAG);
-                contributorQuery.whereContains(Entry.KEY_CONTRIBUTORS, userID);
+
+                List<ParseUser> authorList = new ArrayList<ParseUser>();
+                authorList.add(user);
+
+                contributorQuery.whereContainsAll(Entry.KEY_CONTRIBUTORS, authorList);
                 contributorQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.SHARED.toString());
 
                 ParseQuery<Entry> authorQuery = new ParseQuery<>(Entry.TAG);
-                authorQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+                authorQuery.whereEqualTo(Entry.KEY_AUTHOR, user);
                 authorQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.SHARED.toString());
 
                 List<ParseQuery<Entry>> queries = Arrays.asList(contributorQuery, authorQuery);
