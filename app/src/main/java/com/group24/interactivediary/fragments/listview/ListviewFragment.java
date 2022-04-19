@@ -243,6 +243,12 @@ public class ListviewFragment extends Fragment {
         super.onDestroyView();
     }
 
+    @Override
+    public void onResume() {
+        populateHomeTimeline();
+        super.onResume();
+    }
+
     private void populateHomeTimeline() {
         entryManager.fetchEntries(visibility, sortType, search, null, entriesFound -> {
             Log.e(TAG, entriesFound.size() + " entries found");
@@ -257,6 +263,7 @@ public class ListviewFragment extends Fragment {
     }
 
     private void loadMorePosts() {
+        if (entries.size() == 0) return;
         Date latestEntry = entries.get(entries.size()-1).getUpdatedAt();
         entryManager.fetchEntries(visibility, sortType, search, latestEntry, entriesFound -> {
             Log.e(TAG, entriesFound.size() + " extra entries found");

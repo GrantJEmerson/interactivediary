@@ -20,13 +20,11 @@ import java.util.List;
 public class EntryManager {
     public static final String TAG = "EntryManager";
 
-    String userID;
     Context context;
     LocationManager locationManager;
 
     public EntryManager(Context context) {
         this.context = context;
-        userID = ParseUser.getCurrentUser().getObjectId();
     }
 
     public void fetchEntries(Entry.Visibility visibility, Entry.Ordering ordering, Search search, Date latestEntry, final FetchCallback<List<Entry>> callback) {
@@ -36,17 +34,17 @@ public class EntryManager {
             case PRIVATE:
                 Log.e(TAG, "querying for private entries");
                 entryQuery = new ParseQuery<>(Entry.TAG);
-                entryQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+                entryQuery.whereEqualTo(Entry.KEY_AUTHOR, ParseUser.getCurrentUser());
                 entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.PRIVATE.toString());
                 break;
             case SHARED:
                 Log.e(TAG, "querying for shared entries");
                 ParseQuery<Entry> contributorQuery = new ParseQuery<>(Entry.TAG);
-                contributorQuery.whereContains(Entry.KEY_CONTRIBUTORS, userID);
+                contributorQuery.whereEqualTo(Entry.KEY_CONTRIBUTORS, ParseUser.getCurrentUser().getObjectId());
                 contributorQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.SHARED.toString());
 
                 ParseQuery<Entry> authorQuery = new ParseQuery<>(Entry.TAG);
-                authorQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
+                authorQuery.whereEqualTo(Entry.KEY_AUTHOR, ParseUser.getCurrentUser());
                 authorQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.SHARED.toString());
 
                 List<ParseQuery<Entry>> queries = Arrays.asList(contributorQuery, authorQuery);
@@ -101,11 +99,11 @@ public class EntryManager {
         if (latestEntry != null) {
             if (ordering == Entry.Ordering.DATE_ASCENDING) {
                 // Query only posts that are younger than the given date
-                entryQuery.whereLessThan("createdAt", latestEntry);
+                entryQuery.whereGreaterThan(Entry.KEY_UPDATED_AT, latestEntry);
             }
             else {
                 // Query only posts that are older than the given date
-                entryQuery.whereGreaterThan("createdAt", latestEntry);
+                entryQuery.whereLessThan(Entry.KEY_UPDATED_AT, latestEntry);
             }
         }
 
