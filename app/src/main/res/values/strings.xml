@@ -17,6 +17,8 @@
     <string name="verifying_credentials">Verifying credentials...</string>
     <string name="login_failed">Login failed, please try again</string>
     <string name="signup_failed">Signup failed, please try again</string>
+    <string name="signup_failed_invalid_username">Signup failed. Your username can not contain special characters.</string>
+    <string name="signup_failed_invalid_password">Signup failed. Your password must contain at least 7 characters.</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_entry_create">Create an Entry</string>
     <string name="title_activity_home">Home</string>
