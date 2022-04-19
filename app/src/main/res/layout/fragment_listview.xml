@@ -37,6 +37,14 @@
             android:visibility="gone"
             tools:visibility="visible" />
 
+        <Spinner
+            android:id="@+id/listviewSortTypeSpinner"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/listviewSearchTypeSpinner"
+            android:layout_weight="3"
+            android:visibility="visible" />
+
     </LinearLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
