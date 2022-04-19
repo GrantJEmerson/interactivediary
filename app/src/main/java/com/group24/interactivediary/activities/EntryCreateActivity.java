@@ -1,5 +1,6 @@
 package com.group24.interactivediary.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -120,7 +121,11 @@ public class EntryCreateActivity extends AppCompatActivity {
                 }
 
                 Location location = getCurrentUserLocation();
-                ParseGeoPoint geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+
+                if (location != null) {
+                    ParseGeoPoint geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+                    entry.setLocation(geoPointLocation);
+                }
 
                 Date currentDate = new Date();
 
@@ -134,7 +139,6 @@ public class EntryCreateActivity extends AppCompatActivity {
                 entry.setVisibility(visibility);
                 entry.setUpdatedAtDay(currentDate.getDay());
                 entry.setUpdatedAtMonth(currentDate.getMonth());
-                entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");
                 entry.saveInBackground(new SaveCallback() {
                     @Override
