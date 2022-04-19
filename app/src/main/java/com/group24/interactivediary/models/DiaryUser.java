@@ -17,7 +17,6 @@ import java.util.List;
 public class DiaryUser {
     public static final String TAG = "DiaryUser";
     public static final String KEY_PROFILE_PICTURE = "profilePicture";
-    public static final String KEY_FRIENDS = "friends";
     public static final String KEY_GETS_NOTIFICATIONS = "getNotifications";
 
     private ParseUser user;
@@ -55,20 +54,6 @@ public class DiaryUser {
 
         ParseFile image = new ParseFile(profilePictureBytes);
         user.put(KEY_PROFILE_PICTURE, image);
-    }
-
-    public List<ParseUser> getFriends() {
-        return user.getList(KEY_FRIENDS);
-    }
-
-    public void setFriends(List<ParseUser> friends) {
-        user.put(KEY_FRIENDS, friends);
-    }
-
-    public void addFriend(ParseUser friend) {
-        List<ParseUser> friends = getFriends();
-        friends.add(friend);
-        user.put(KEY_FRIENDS, friends);
     }
 
     public boolean getGetsNotifications() {

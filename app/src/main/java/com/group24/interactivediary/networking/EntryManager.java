@@ -6,17 +6,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 
-import com.group24.interactivediary.adapters.EntryAdapter;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.models.Search;
 import com.parse.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -27,17 +23,13 @@ public class EntryManager {
     String userID;
     Context context;
     LocationManager locationManager;
-    EntryAdapter entryAdapter;
-    TextView nothingHereYet;
 
-    public EntryManager(Context context, EntryAdapter entryAdapter, TextView nothingHereYet) {
+    public EntryManager(Context context) {
         this.context = context;
         userID = ParseUser.getCurrentUser().getObjectId();
-        this.entryAdapter = entryAdapter;
-        this.nothingHereYet = nothingHereYet;
     }
 
-    public void fetchEntries(Entry.Visibility visibility, Entry.Ordering ordering, Search search, final FetchCallback<List<Entry>> callback) {
+    public void fetchEntries(Entry.Visibility visibility, Entry.Ordering ordering, Search search, Date latestEntry, final FetchCallback<List<Entry>> callback) {
         ParseQuery<Entry> entryQuery;
 
         switch (visibility) {
@@ -94,6 +86,20 @@ public class EntryManager {
                 break;
         }
 
+        // Limit query to latest 20 items
+        entryQuery.setLimit(20);
+
+        if (latestEntry != null) {
+            if (ordering == Entry.Ordering.DATE_ASCENDING) {
+                // Query only posts that are younger than the given date
+                entryQuery.whereGreaterThan("createdAt", latestEntry);
+            }
+            else {
+                // Query only posts that are older than the given date
+                entryQuery.whereLessThan("createdAt", latestEntry);
+            }
+        }
+
         entryQuery.include(Entry.KEY_AUTHOR);
         entryQuery.include(Entry.KEY_CONTRIBUTORS);
         entryQuery.include(Entry.KEY_MEDIA_ITEMS);
@@ -105,7 +111,8 @@ public class EntryManager {
                     entryQuery.whereContains(Entry.KEY_TITLE, (String) search.searchParameter);
                     break;
                 case DATE:
-                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT, (Date) search.searchParameter);
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_DAY, ((Date) search.searchParameter).getDay());
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_MONTH, ((Date) search.searchParameter).getMonth());
                     break;
                 case LOCATION:
                     Location searchLocation = (Location) search.searchParameter;
@@ -121,14 +128,6 @@ public class EntryManager {
 
         entryQuery.findInBackground((entriesFound, e) -> {
             if (e == null) {
-                // Clear out old items before appending in the new ones
-                entryAdapter.clear();
-                // Save received posts to list and notify adapter of new data
-                entryAdapter.addAll(entriesFound);
-                // Show empty message if gallery is empty
-                if (entriesFound.size() == 0) nothingHereYet.setVisibility(View.VISIBLE);
-                else nothingHereYet.setVisibility(View.GONE);
-
                 callback.done(entriesFound);
             } else {
                 Log.e(TAG, "Error fetching entries: " + e.getLocalizedMessage());

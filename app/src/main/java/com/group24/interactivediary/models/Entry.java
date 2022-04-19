@@ -34,6 +34,8 @@ public class Entry extends ParseObject implements Parcelable {
     public static final String KEY_VISIBILITY = "visibility";
     public static final String KEY_CREATED_AT = "createdAt";
     public static final String KEY_UPDATED_AT = "updatedAt";
+    public static final String KEY_UPDATED_AT_DAY = "updatedAtDay";
+    public static final String KEY_UPDATED_AT_MONTH = "updatedAtMonth";
     public static final String KEY_LOCATION = "location";
 
     // Enums
@@ -186,6 +188,14 @@ public class Entry extends ParseObject implements Parcelable {
 
     public Visibility getVisibility() {
         return Visibility.valueOf(getString(KEY_VISIBILITY));
+    }
+
+    public void setUpdatedAtDay(int day) {
+        put(KEY_UPDATED_AT_DAY, day);
+    }
+
+    public void setUpdatedAtMonth(int month) {
+        put(KEY_UPDATED_AT_MONTH, month);
     }
 
     public void setLocation(ParseGeoPoint location) {
