@@ -97,6 +97,18 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp" />
+
+            <Button
+                android:id="@+id/delete_account_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delete Account" />
+
         </LinearLayout>
 
     </ScrollView>

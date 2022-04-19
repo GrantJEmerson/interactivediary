@@ -54,6 +54,10 @@
     <string name="notifications">Notifications</string>
     <string name="title_activity_profile">Profile</string>
     <string name="failed_to_save_user_settings">Failed to save user settings, please try again.</string>
+    <string name="failed_to_delete_account">Failed to delete account, please try again.</string>
+    <string name="deleting_account">Deleting Account...</string>
+    <string name="confirm_account_deletion_title">Confirm Account Deletion</string>
+    <string name="confirm_account_deletion_message">Are you sure you want to delete your account? All of your entries will be deleted.</string>
     <string name="you_will_receive_notifications">You will now receive notifications.</string>
     <string name="you_will_not_receive_notifications">You will no longer receive notifications.</string>
     <string name="we_need_location_permissions_for_mapview">We need permission to access your location in order to use Map View.</string>

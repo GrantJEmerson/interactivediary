@@ -3,7 +3,9 @@ package com.group24.interactivediary.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -16,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.group24.interactivediary.models.DiaryUser;
 import com.group24.interactivediary.R;
+import com.group24.interactivediary.networking.EntryManager;
 import com.parse.ParseUser;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -26,6 +29,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView profileUsernameTextView;
     private SwitchMaterial notificationSwitch;
+    private Button deleteAccountButton;
 
     // Other necessary member variables
     DiaryUser curUser;
@@ -40,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         profileUsernameTextView = findViewById(R.id.profileUsernameTextView);
         notificationSwitch = findViewById(R.id.notificationSwitch);
+        deleteAccountButton = findViewById(R.id.delete_account_button);
 
         // Initialize other member variables
         curUser = new DiaryUser(ParseUser.getCurrentUser());
@@ -52,6 +57,24 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Set up username TextView
         profileUsernameTextView.setText(ParseUser.getCurrentUser().getUsername());
+
+        // Set up delete account button
+        deleteAccountButton.setOnClickListener(v -> {
+            // Confirm delete account
+            AlertDialog.Builder confirmAccountDeletionDialog = new AlertDialog.Builder(this)
+                    .setTitle(getResources().getString(R.string.confirm_account_deletion_title))
+                    .setMessage(getResources().getString(R.string.confirm_account_deletion_message))
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            deleteAccount();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, null);
+
+            confirmAccountDeletionDialog.show();
+        });
 
         // Set up notification switch
         // Set initial configuration
@@ -138,6 +161,33 @@ public class ProfileActivity extends AppCompatActivity {
             else { // Logout has succeeded
                 goLoginSignupActivity();
                 finish();
+            }
+        });
+    }
+
+    // Deletes user's account and associated entries.
+    // Then sends them back to login/signup page.
+    private void deleteAccount() {
+        ProgressDialog deleteAccountProgressDialog = new ProgressDialog(ProfileActivity.this);
+        deleteAccountProgressDialog.setMessage(getResources().getString(R.string.deleting_account));
+        deleteAccountProgressDialog.setCancelable(false);
+        deleteAccountProgressDialog.show();
+
+        EntryManager entryManager = new EntryManager(this);
+        entryManager.deleteUsersEntries(success -> {
+            if (success == true) {
+                ParseUser.getCurrentUser().deleteInBackground(exception -> {
+                    deleteAccountProgressDialog.dismiss();
+                    if (exception != null) { // Account deletion has failed
+                        Snackbar.make(relativeLayout, getResources().getString(R.string.failed_to_delete_account), Snackbar.LENGTH_LONG).show();
+                    } else { // Account has been deleted
+                        goLoginSignupActivity();
+                        finish();
+                    }
+                });
+            } else {
+                deleteAccountProgressDialog.dismiss();
+                Snackbar.make(relativeLayout, getResources().getString(R.string.failed_to_delete_account), Snackbar.LENGTH_LONG).show();
             }
         });
     }
