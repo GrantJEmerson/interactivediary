@@ -15,6 +15,7 @@ import com.parse.*;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 public class EntryManager {
@@ -25,6 +26,42 @@ public class EntryManager {
 
     public EntryManager(Context context) {
         this.context = context;
+    }
+
+    public void deleteUsersEntries(final FetchCallback<Boolean> callback) {
+        ParseQuery<Entry> entryQuery;
+        entryQuery = new ParseQuery<>(Entry.TAG);
+        entryQuery.whereEqualTo(Entry.KEY_AUTHOR, ParseUser.getCurrentUser());
+
+        entryQuery.findInBackground((entriesFound, e) -> {
+            if (e == null) {
+                final Iterator<Entry> entryIterator = entriesFound.iterator();
+
+                DeleteCallback handler = new DeleteCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null) {
+                            callback.done(false);
+                        } else {
+                            if (entryIterator.hasNext()) {
+                                entryIterator.next().deleteInBackground(this);
+                            } else {
+                                callback.done(true);
+                            }
+                        }
+                    }
+                };
+
+                if (entryIterator.hasNext()) {
+                    entryIterator.next().deleteInBackground(handler);
+                } else {
+                    callback.done(true);
+                }
+            } else {
+                Log.e(TAG, "Error fetching entries: " + e.getLocalizedMessage());
+                callback.done(false);
+            }
+        });
     }
 
     public void fetchEntries(Entry.Visibility visibility, Entry.Ordering ordering, Search search, Date latestEntry, final FetchCallback<List<Entry>> callback) {
