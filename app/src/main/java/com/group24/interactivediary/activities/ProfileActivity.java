@@ -175,12 +175,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         EntryManager entryManager = new EntryManager(this);
         entryManager.deleteUsersEntries(success -> {
-            if (success == true) {
+            if (success) {
                 ParseUser.getCurrentUser().deleteInBackground(exception -> {
                     deleteAccountProgressDialog.dismiss();
                     if (exception != null) { // Account deletion has failed
                         Snackbar.make(relativeLayout, getResources().getString(R.string.failed_to_delete_account), Snackbar.LENGTH_LONG).show();
                     } else { // Account has been deleted
+                        finish();
                         goLoginSignupActivity();
                         finish();
                     }
