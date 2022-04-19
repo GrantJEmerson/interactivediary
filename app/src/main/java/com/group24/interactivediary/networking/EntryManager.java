@@ -148,11 +148,11 @@ public class EntryManager {
         if (latestEntry != null) {
             if (ordering == Entry.Ordering.DATE_ASCENDING) {
                 // Query only posts that are younger than the given date
-                entryQuery.whereLessThan("createdAt", latestEntry);
+                entryQuery.whereGreaterThan(Entry.KEY_UPDATED_AT, latestEntry);
             }
             else {
                 // Query only posts that are older than the given date
-                entryQuery.whereGreaterThan("createdAt", latestEntry);
+                entryQuery.whereLessThan(Entry.KEY_UPDATED_AT, latestEntry);
             }
         }
 

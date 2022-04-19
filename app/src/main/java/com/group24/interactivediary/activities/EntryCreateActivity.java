@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -27,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.group24.interactivediary.fragments.listview.ListviewViewModel;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.R;
 import com.parse.ParseException;
@@ -61,6 +63,8 @@ public class EntryCreateActivity extends AppCompatActivity {
     LocationManager locationManager;
     Location location;
     ParseGeoPoint geoPointLocation;
+    private ViewModelProvider viewModelProvider;
+    private ListviewViewModel listviewViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,8 @@ public class EntryCreateActivity extends AppCompatActivity {
 
         // Initialize other member variables
         entry = new Entry();
+        viewModelProvider = new ViewModelProvider(this);
+        listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
 
         // Set up toolbar
         toolbar.setTitleTextColor(getResources().getColor(R.color.white, getTheme()));
@@ -146,7 +152,10 @@ public class EntryCreateActivity extends AppCompatActivity {
                             Log.e(TAG, "Failed to save new entry: " + e.getLocalizedMessage());
                         }
                         else {
+                            listviewViewModel.setVisibility(visibility);
+                            Log.e(TAG, listviewViewModel.getVisibility().getValue().toString());
                             Log.e(TAG, "Saved new entry!");
+                            // TODO: make this actually work lol
                             finish(); // Exits activity
                         }
                     }
