@@ -71,43 +71,51 @@ public class EntryManager {
 
         switch (visibility) {
             case PRIVATE:
+                Log.e(TAG, "querying for private entries");
                 entryQuery = new ParseQuery<>(Entry.TAG);
                 entryQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
-                entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, "PRIVATE");
+                entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.PRIVATE.toString());
                 break;
             case SHARED:
+                Log.e(TAG, "querying for shared entries");
                 ParseQuery<Entry> contributorQuery = new ParseQuery<>(Entry.TAG);
                 contributorQuery.whereContains(Entry.KEY_CONTRIBUTORS, userID);
-                contributorQuery.whereEqualTo(Entry.KEY_VISIBILITY, "SHARED");
+                contributorQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.SHARED.toString());
 
                 ParseQuery<Entry> authorQuery = new ParseQuery<>(Entry.TAG);
                 authorQuery.whereEqualTo(Entry.KEY_AUTHOR, userID);
-                authorQuery.whereEqualTo(Entry.KEY_VISIBILITY, "SHARED");
+                authorQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.SHARED.toString());
 
                 List<ParseQuery<Entry>> queries = Arrays.asList(contributorQuery, authorQuery);
                 entryQuery = ParseQuery.or(queries);
                 break;
             case PUBLIC:
             default:
+                Log.e(TAG, "querying for public entries");
                 entryQuery = new ParseQuery<>(Entry.TAG);
-                entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, "PUBLIC");
+                entryQuery.whereEqualTo(Entry.KEY_VISIBILITY, Entry.Visibility.PUBLIC.toString());
                 break;
         }
 
         switch (ordering) {
             case TITLE_ASCENDING:
+                Log.e(TAG, "query sorted by title ascending");
                 entryQuery.addAscendingOrder(Entry.KEY_TITLE);
                 break;
             case TITLE_DESCENDING:
+                Log.e(TAG, "query sorted by title descending");
                 entryQuery.addDescendingOrder(Entry.KEY_TITLE);
                 break;
             case DATE_ASCENDING:
+                Log.e(TAG, "query sorted by date ascending");
                 entryQuery.addAscendingOrder(Entry.KEY_UPDATED_AT);
                 break;
             case DATE_DESCENDING:
+                Log.e(TAG, "query sorted by date descending");
                 entryQuery.addDescendingOrder(Entry.KEY_UPDATED_AT);
                 break;
             case NEAREST:
+                Log.e(TAG, "query sorted by nearest");
                 Location userCurrentLocation = getCurrentUserLocation();
                 if (userCurrentLocation != null) {
                     ParseGeoPoint geoPoint = new ParseGeoPoint();
@@ -119,6 +127,7 @@ public class EntryManager {
                     break;
                 }
             default:
+                Log.e(TAG, "query sorted by date descending");
                 entryQuery.addDescendingOrder(Entry.KEY_UPDATED_AT);
                 break;
         }
@@ -129,11 +138,11 @@ public class EntryManager {
         if (latestEntry != null) {
             if (ordering == Entry.Ordering.DATE_ASCENDING) {
                 // Query only posts that are younger than the given date
-                entryQuery.whereGreaterThan("createdAt", latestEntry);
+                entryQuery.whereLessThan("createdAt", latestEntry);
             }
             else {
                 // Query only posts that are older than the given date
-                entryQuery.whereLessThan("createdAt", latestEntry);
+                entryQuery.whereGreaterThan("createdAt", latestEntry);
             }
         }
 

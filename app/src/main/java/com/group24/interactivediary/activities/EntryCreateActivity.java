@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -41,6 +42,8 @@ import java.util.List;
 public class EntryCreateActivity extends AppCompatActivity {
     public static final String TAG = "EntryCreateActivity";
 
+    public static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 368643; // just an arbitrary number
+
     // Views in the layout
     private RelativeLayout relativeLayout;
     private Toolbar toolbar;
@@ -56,6 +59,8 @@ public class EntryCreateActivity extends AppCompatActivity {
     // Other necessary member variables
     Entry entry;
     LocationManager locationManager;
+    Location location;
+    ParseGeoPoint geoPointLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,13 +125,6 @@ public class EntryCreateActivity extends AppCompatActivity {
                     return;
                 }
 
-                Location location = getCurrentUserLocation();
-
-                if (location != null) {
-                    ParseGeoPoint geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-                    entry.setLocation(geoPointLocation);
-                }
-
                 Date currentDate = new Date();
 
                 // Put all the information together
@@ -139,6 +137,7 @@ public class EntryCreateActivity extends AppCompatActivity {
                 entry.setVisibility(visibility);
                 entry.setUpdatedAtDay(currentDate.getDay());
                 entry.setUpdatedAtMonth(currentDate.getMonth());
+                if (location != null) entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");
                 entry.saveInBackground(new SaveCallback() {
                     @Override
@@ -224,6 +223,54 @@ public class EntryCreateActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    // Called when the user is performing an action which requires the app to access the user's location
+    public void getPermissionToAccessFineLocation() {
+        // 1) Use the support library version ContextCompat.checkSelfPermission(...) to avoid
+        // checking the build version since Context.checkSelfPermission(...) is only available
+        // in Marshmallow
+        // 2) Always check for permission (even if permission has already been granted)
+        // since the user can revoke permissions at any time through Settings
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // The permission is NOT already granted.
+
+            // Fire off an async request to actually get the permission
+            // This will show the standard permission request dialog UI
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST);
+        }
+        else {
+            location = getCurrentUserLocation();
+            geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+        }
+    }
+
+    // Callback with the request from calling requestPermissions(...)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        // Make sure it's our original ACCESS_FINE_LOCATION request
+        if (requestCode == ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST) {
+            // Permission has been granted
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, getResources().getText(R.string.location_permissions_granted), Toast.LENGTH_SHORT).show();
+
+                // Get location
+                location = getCurrentUserLocation();
+                geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+            }
+            // Permission has been denied
+            else {
+                // showRationale = false if user clicks Never Ask Again, otherwise true
+                boolean showRationale = shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
+
+                if (!showRationale) {
+                    Toast.makeText(this, getResources().getText(R.string.location_permissions_denied), Toast.LENGTH_SHORT).show();
+                }
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     private Location getCurrentUserLocation() {
