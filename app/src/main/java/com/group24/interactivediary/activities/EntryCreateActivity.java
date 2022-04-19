@@ -37,6 +37,8 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -84,7 +86,6 @@ public class EntryCreateActivity extends AppCompatActivity {
         postButton = findViewById(R.id.createEntryPostButton);
 
         // Initialize other member variables
-        entry = new Entry();
         viewModelProvider = new ViewModelProvider(this);
         listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
 
@@ -93,6 +94,37 @@ public class EntryCreateActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        // Unwrap the entry that was passed in by the intent
+        entry = (Entry) Parcels.unwrap(getIntent().getParcelableExtra(Entry.class.getSimpleName()));
+
+        if (entry != null) { // an entry was passed in via Parcel, so we are editing a preexisting entry
+            // put in all the existing data
+            titleEditText.setText(entry.getTitle());
+            textEditText.setText(entry.getText());
+            // TODO: handle media
+            switch (entry.getVisibility()) {
+                case PRIVATE:
+                    privateRadioButton.setChecked(true);
+                    sharedRadioButton.setChecked(false);
+                    publicRadioButton.setChecked(false);
+                    break;
+                case SHARED:
+                    privateRadioButton.setChecked(false);
+                    sharedRadioButton.setChecked(true);
+                    publicRadioButton.setChecked(false);
+                    break;
+                case PUBLIC:
+                default:
+                    privateRadioButton.setChecked(false);
+                    sharedRadioButton.setChecked(false);
+                    publicRadioButton.setChecked(true);
+                    break;
+            }
+        }
+        else {
+            entry = new Entry();
+        }
 
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -45,6 +46,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
     private TextView timestampTextView;
     private CardView mediaCardView;
     private TextView textTextView;
+    private Button editButton;
 
     // Other necessary member variables
     private Entry entry;
@@ -63,6 +65,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
         timestampTextView = findViewById(R.id.entryDetailsTimestampTextView);
         mediaCardView = findViewById(R.id.entryDetailsMediaCardView);
         textTextView = findViewById(R.id.entryDetailsTextTextView);
+        editButton = findViewById(R.id.entryDetailsEditButton);
 
         // Initialize other member variables
         context = this;
@@ -75,6 +78,12 @@ public class EntryDetailsActivity extends AppCompatActivity {
 
         // Unwrap the entry that was passed in by the intent
         entry = (Entry) Parcels.unwrap(getIntent().getParcelableExtra(Entry.class.getSimpleName()));
+
+        // Show edit button if private or shared, hide if public
+        if (entry.getVisibility() == Entry.Visibility.PRIVATE || entry.getVisibility() == Entry.Visibility.SHARED) {
+            editButton.setVisibility(View.VISIBLE);
+        }
+        else editButton.setVisibility(View.GONE);
 
         // Bind the entry to the layout
         List<List> mediaItemsLists = entry.getMediaItems();
@@ -137,6 +146,13 @@ public class EntryDetailsActivity extends AppCompatActivity {
         authorTextView.setText(entry.getAuthor().getUsername());
         timestampTextView.setText(entry.getTimestamp());
         textTextView.setText(entry.getText());
+
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goEntryCreateActivity();
+            }
+        });
     }
 
     @Override
@@ -189,6 +205,14 @@ public class EntryDetailsActivity extends AppCompatActivity {
     private void goProfileActivity() {
         Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
+    }
+
+    // Starts an intent to go to the EntryCreate activity
+    private void goEntryCreateActivity() {
+        Intent intent = new Intent(this, EntryCreateActivity.class);
+        intent.putExtra(Entry.class.getSimpleName(), Parcels.wrap(entry));
+        startActivity(intent);
+        finish();
     }
 
     // Logs out user and sends them back to login/signup page
