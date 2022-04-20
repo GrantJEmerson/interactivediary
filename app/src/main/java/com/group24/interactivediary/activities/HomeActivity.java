@@ -338,15 +338,14 @@ public class HomeActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (locationManager == null) {
                 locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-                return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             }
+            return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         }
         return null;
     }
 
     private void ifNoLocationPermission() {
-        // TODO: toast saying we need location permissions to order or search by location
-        // set whatever menu to previous state (if ordering menu set to "nearest", set to whatever it was before,
-        // if search menu set to search by location, set to whatever it was before)
+        // TODO: toast saying we need location permissions to order by location
+        // set whatever menu to previous state (if ordering menu set to "nearest", set to whatever it was before
     }
 }

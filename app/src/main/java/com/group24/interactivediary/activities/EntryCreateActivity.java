@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -70,6 +71,7 @@ public class EntryCreateActivity extends AppCompatActivity {
     private RadioButton publicRadioButton;
     private ExpandableLayout contributorsExpandableLayout;
     private EditText contributorsEditText;
+    private Switch locationSwitch;
     private Button postButton;
 
     // Other necessary member variables
@@ -95,6 +97,7 @@ public class EntryCreateActivity extends AppCompatActivity {
         publicRadioButton = findViewById(R.id.createEntryPublicRadioButton);
         contributorsExpandableLayout = findViewById(R.id.entryCreateAddContributorsExpandableLayout);
         contributorsEditText = findViewById(R.id.entryCreateAddContributorEditText);
+        locationSwitch = findViewById(R.id.createEntryLocationSwitch);
         postButton = findViewById(R.id.createEntryPostButton);
 
         // Initialize other member variables
@@ -152,6 +155,8 @@ public class EntryCreateActivity extends AppCompatActivity {
                     contributorsExpandableLayout.collapse();
                     break;
             }
+            if (entry.getLocation() != null) locationSwitch.setChecked(true);
+            else locationSwitch.setChecked(false);
         }
         else {
             entry = new Entry();
@@ -177,6 +182,14 @@ public class EntryCreateActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 contributorsExpandableLayout.collapse();
+            }
+        });
+
+        locationSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (locationSwitch.isChecked()) getPermissionToAccessFineLocation();
+                else location = null;
             }
         });
 
@@ -351,7 +364,7 @@ public class EntryCreateActivity extends AppCompatActivity {
         }
         else {
             location = getCurrentUserLocation();
-            geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+            if (location != null) geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
         }
     }
 

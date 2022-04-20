@@ -65,4 +65,5 @@
     <string name="edit_entry">Edit entry</string>
     <string name="edit_an_entry">Edit an Entry</string>
     <string name="add_contributors_here">Type the usernames of whoever you want to add to the entry!</string>
+    <string name="add_location_to_entry">Add location to entry?</string>
 </resources>
