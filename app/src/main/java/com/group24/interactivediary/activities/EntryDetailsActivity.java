@@ -5,12 +5,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.ViewCompat;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,7 +35,6 @@ import com.parse.ParseUser;
 import org.parceler.Parcels;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class EntryDetailsActivity extends AppCompatActivity {
@@ -89,6 +90,110 @@ public class EntryDetailsActivity extends AppCompatActivity {
             else editButton.setVisibility(View.GONE);
         }
 
+        bindEntryToLayout();
+
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goEntryCreateActivity();
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        // Add username next to profile icon
+        menu.findItem(R.id.username).setTitle(ParseUser.getCurrentUser().getUsername());
+        // Make the username text unclickable
+        menu.findItem(R.id.username).setEnabled(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.profileMenuItem:
+                goProfileActivity();
+                return true;
+            case R.id.logoutMenuItem:
+                logout();
+                return true;
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
+    // Starts an intent to go to the login/signup activity
+    private void goLoginSignupActivity() {
+        Intent intent = new Intent(this, LoginSignupActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    // Starts an intent to go to the profile activity
+    private void goProfileActivity() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
+    }
+
+    // Starts an intent to go to the EntryCreate activity
+    private void goEntryCreateActivity() {
+        Intent intent = new Intent(this, EntryCreateActivity.class);
+        intent.putExtra(Entry.class.getSimpleName(), Parcels.wrap(entry));
+        startActivityForResult(intent, EntryCreateActivity.EDIT_ACTIVITY);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.e(TAG, "requestCode = " + requestCode);
+        if (requestCode == EntryCreateActivity.EDIT_ACTIVITY) {
+            if(resultCode == Activity.RESULT_OK){
+                Entry returnedEntry = Parcels.unwrap(data.getParcelableExtra(EntryCreateActivity.ENTRY_RESULT_TAG));
+                entry = returnedEntry;
+                bindEntryToLayout();
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                // Do nothing
+            }
+        }
+    }
+
+    // Logs out user and sends them back to login/signup page
+    private void logout() {
+        ProgressDialog logoutProgressDialog = new ProgressDialog(EntryDetailsActivity.this);
+        logoutProgressDialog.setMessage(getResources().getString(R.string.logging_out));
+        logoutProgressDialog.setCancelable(false);
+        logoutProgressDialog.show();
+        ParseUser.logOutInBackground(e -> {
+            logoutProgressDialog.dismiss();
+            if (e != null) {  // Logout has failed
+                Snackbar.make(relativeLayout, getResources().getString(R.string.logout_failed), Snackbar.LENGTH_LONG).show();
+            }
+            else { // Logout has succeeded
+                goLoginSignupActivity();
+                finish();
+            }
+        });
+    }
+
+    private void bindEntryToLayout() {
         // Bind the entry to the layout
         List<List> mediaItemsLists = entry.getMediaItems();
         // Images
@@ -169,90 +274,5 @@ public class EntryDetailsActivity extends AppCompatActivity {
             }
             authorTextView.setText(entry.getAuthor().getUsername() + ", " + contributorsString);
         }
-
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goEntryCreateActivity();
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-
-        // Add username next to profile icon
-        menu.findItem(R.id.username).setTitle(ParseUser.getCurrentUser().getUsername());
-        // Make the username text unclickable
-        menu.findItem(R.id.username).setEnabled(false);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.profileMenuItem:
-                goProfileActivity();
-                return true;
-            case R.id.logoutMenuItem:
-                logout();
-                return true;
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
-    }
-
-    // Starts an intent to go to the login/signup activity
-    private void goLoginSignupActivity() {
-        Intent intent = new Intent(this, LoginSignupActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-
-    // Starts an intent to go to the profile activity
-    private void goProfileActivity() {
-        Intent intent = new Intent(this, ProfileActivity.class);
-        startActivity(intent);
-    }
-
-    // Starts an intent to go to the EntryCreate activity
-    private void goEntryCreateActivity() {
-        Intent intent = new Intent(this, EntryCreateActivity.class);
-        intent.putExtra(Entry.class.getSimpleName(), Parcels.wrap(entry));
-        startActivity(intent);
-        finish();
-    }
-
-    // Logs out user and sends them back to login/signup page
-    private void logout() {
-        ProgressDialog logoutProgressDialog = new ProgressDialog(EntryDetailsActivity.this);
-        logoutProgressDialog.setMessage(getResources().getString(R.string.logging_out));
-        logoutProgressDialog.setCancelable(false);
-        logoutProgressDialog.show();
-        ParseUser.logOutInBackground(e -> {
-            logoutProgressDialog.dismiss();
-            if (e != null) {  // Logout has failed
-                Snackbar.make(relativeLayout, getResources().getString(R.string.logout_failed), Snackbar.LENGTH_LONG).show();
-            }
-            else { // Logout has succeeded
-                goLoginSignupActivity();
-                finish();
-            }
-        });
     }
 }

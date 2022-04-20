@@ -1,18 +1,15 @@
 package com.group24.interactivediary.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -42,6 +39,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import org.parceler.Parcels;
 
 public class HomeActivity extends AppCompatActivity {
     public static final String TAG = "HomeActivity";
@@ -228,7 +227,7 @@ public class HomeActivity extends AppCompatActivity {
     // Starts an intent to go to the EntryCreate activity
     private void goEntryCreateActivity() {
         Intent intent = new Intent(this, EntryCreateActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, EntryCreateActivity.CREATE_ACTIVITY);
     }
 
     // Starts an intent to go to the profile activity
@@ -242,6 +241,22 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginSignupActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.e(TAG, "requestCode = " + requestCode);
+        if (requestCode == EntryCreateActivity.CREATE_ACTIVITY) {
+            if(resultCode == Activity.RESULT_OK){
+                Entry returnedEntry = Parcels.unwrap(data.getParcelableExtra(EntryCreateActivity.ENTRY_RESULT_TAG));
+                Entry.Visibility visibility = returnedEntry.getVisibility();
+                listviewViewModel.setVisibility(visibility);
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                // Do nothing
+            }
+        }
     }
 
     // Logs out user and sends them back to login/signup page
