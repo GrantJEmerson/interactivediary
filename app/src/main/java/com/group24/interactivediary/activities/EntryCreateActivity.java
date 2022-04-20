@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -50,6 +51,10 @@ import java.util.List;
 public class EntryCreateActivity extends AppCompatActivity {
     public static final String TAG = "EntryCreateActivity";
 
+    public static final int CREATE_ACTIVITY = 5732787; // just an arbitrary number
+    public static final int EDIT_ACTIVITY = 7643278; // just an arbitrary number
+    public static final String ENTRY_RESULT_TAG = "entryFromEntryCreateActivity";
+
     public static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 368643; // just an arbitrary number
 
     // Views in the layout
@@ -71,8 +76,6 @@ public class EntryCreateActivity extends AppCompatActivity {
     LocationManager locationManager;
     Location location;
     ParseGeoPoint geoPointLocation;
-    private ViewModelProvider viewModelProvider;
-    private ListviewViewModel listviewViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,8 +97,6 @@ public class EntryCreateActivity extends AppCompatActivity {
         postButton = findViewById(R.id.createEntryPostButton);
 
         // Initialize other member variables
-        viewModelProvider = new ViewModelProvider(this);
-        listviewViewModel = viewModelProvider.get(ListviewViewModel.class);
 
         // Set up toolbar
         toolbar.setTitleTextColor(getResources().getColor(R.color.white, getTheme()));
@@ -243,11 +244,13 @@ public class EntryCreateActivity extends AppCompatActivity {
                             Log.e(TAG, "Failed to save new entry: " + e.getLocalizedMessage());
                         }
                         else {
-                            listviewViewModel.setVisibility(visibility);
-                            Log.e(TAG, listviewViewModel.getVisibility().getValue().toString());
                             Log.e(TAG, "Saved new entry!");
-                            // TODO: make this actually work lol
-                            finish(); // Exits activity
+
+                            // Tell the Home activity what tab to switch to when we return
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra(ENTRY_RESULT_TAG, Parcels.wrap(entry));
+                            setResult(Activity.RESULT_OK, returnIntent);
+                            finish();
                         }
                     }
                 });
@@ -282,6 +285,8 @@ public class EntryCreateActivity extends AppCompatActivity {
                 logout();
                 return true;
             case android.R.id.home:
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_CANCELED, returnIntent);
                 finish();
                 return true;
             default:
@@ -291,6 +296,9 @@ public class EntryCreateActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
+        Intent returnIntent = new Intent();
+        setResult(Activity.RESULT_CANCELED, returnIntent);
         finish();
     }
 

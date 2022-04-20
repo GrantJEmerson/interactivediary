@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -181,9 +182,7 @@ public class ProfileActivity extends AppCompatActivity {
                     if (exception != null) { // Account deletion has failed
                         Snackbar.make(relativeLayout, getResources().getString(R.string.failed_to_delete_account), Snackbar.LENGTH_LONG).show();
                     } else { // Account has been deleted
-                        finish();
-                        goLoginSignupActivity();
-                        finish();
+                        logout();
                     }
                 });
             } else {

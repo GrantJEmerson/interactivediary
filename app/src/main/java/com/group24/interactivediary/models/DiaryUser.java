@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.group24.interactivediary.networking.FetchCallback;
+import com.parse.DeleteCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -68,5 +69,9 @@ public class DiaryUser {
     // Asynchronously saves the user data to the database
     public void saveInBackground(SaveCallback saveCallback) {
         user.saveInBackground(saveCallback);
+    }
+
+    public void deleteInBackground(DeleteCallback deleteCallback) {
+        user.deleteInBackground(deleteCallback);
     }
 }

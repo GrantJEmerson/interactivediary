@@ -46,9 +46,9 @@
                 tools:text="egg" />
 
             <View
-                android:layout_marginTop="20dp"
                 android:layout_width="fill_parent"
-                android:layout_height="1dp"/>
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp" />
 
             <TextView
                 android:id="@+id/passwordLabel"
@@ -69,9 +69,9 @@
                 android:textSize="30sp" />
 
             <View
-                android:layout_marginTop="20dp"
                 android:layout_width="fill_parent"
-                android:layout_height="1dp"/>
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
