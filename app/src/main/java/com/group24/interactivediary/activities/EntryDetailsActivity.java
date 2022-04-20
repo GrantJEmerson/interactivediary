@@ -80,11 +80,14 @@ public class EntryDetailsActivity extends AppCompatActivity {
         // Unwrap the entry that was passed in by the intent
         entry = (Entry) Parcels.unwrap(getIntent().getParcelableExtra(Entry.class.getSimpleName()));
 
-        // Show edit button if private or shared, hide if public
+        // Show edit button if private or shared, hide if public (unless current user is the author)
         if (entry.getVisibility() == Entry.Visibility.PRIVATE || entry.getVisibility() == Entry.Visibility.SHARED) {
             editButton.setVisibility(View.VISIBLE);
         }
-        else editButton.setVisibility(View.GONE);
+        else {
+            if (entry.getAuthor().getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) editButton.setVisibility(View.VISIBLE);
+            else editButton.setVisibility(View.GONE);
+        }
 
         // Bind the entry to the layout
         List<List> mediaItemsLists = entry.getMediaItems();
