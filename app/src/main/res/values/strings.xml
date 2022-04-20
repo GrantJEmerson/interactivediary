@@ -22,6 +22,7 @@
     <string name="title_activity_home">Home</string>
     <string name="title_listview">List View</string>
     <string name="title_mapview">Map View</string>
+    <string name="deleteEntryMenuItem">Delete</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="privateTab">Private</string>

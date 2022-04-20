@@ -10,11 +10,13 @@ import android.util.Log;
 import androidx.core.app.ActivityCompat;
 
 import com.group24.interactivediary.models.Entry;
+import com.group24.interactivediary.models.GeneralDate;
 import com.group24.interactivediary.models.Search;
 import com.parse.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -167,8 +169,9 @@ public class EntryManager {
                     entryQuery.whereContains(Entry.KEY_TITLE, (String) search.searchParameter);
                     break;
                 case DATE:
-                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_DAY, ((Date) search.searchParameter).getDay());
-                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_MONTH, ((Date) search.searchParameter).getMonth());
+                    GeneralDate date = (GeneralDate) search.searchParameter;
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_DAY, date.getDay());
+                    entryQuery.whereEqualTo(Entry.KEY_UPDATED_AT_MONTH, date.getMonth());
                     break;
                 case LOCATION:
                     Location searchLocation = (Location) search.searchParameter;

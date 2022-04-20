@@ -1,5 +1,8 @@
 package com.group24.interactivediary.fragments.listview;
 
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,12 +28,17 @@ import com.group24.interactivediary.EndlessRecyclerViewScrollListener;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.adapters.EntryAdapter;
 import com.group24.interactivediary.R;
+import com.group24.interactivediary.models.GeneralDate;
 import com.group24.interactivediary.models.Search;
 import com.group24.interactivediary.networking.EntryManager;
 import com.group24.interactivediary.networking.FetchCallback;
+import com.parse.ParseACL;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -106,7 +114,36 @@ public class ListviewFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // TODO: figure out how to adapt string query into Date (in case of Date search) or Location (in case of Location search)
-                search = new Search(searchType, query) {};
+
+                Object searchParameter;
+
+                switch (searchType) {
+                    case DATE:
+                        GeneralDate date = getGeneralDate(query);
+                        if (date == null) {
+                            searchType = Search.SearchType.TITLE;
+                            searchParameter = query;
+                        } else {
+                            searchParameter = date;
+                        }
+                        break;
+                    case LOCATION:
+                        Location location = getLocationFromAddress(query);
+                        if (location == null) {
+                            searchParameter = query;
+                            searchType = Search.SearchType.TITLE;
+                        } else {
+                            searchParameter = location;
+                        }
+                        break;
+                    case TITLE:
+                    default:
+                        searchParameter = query;
+                        searchType = Search.SearchType.TITLE;
+                        break;
+                }
+
+                search = new Search(searchType, searchParameter);
                 populateHomeTimeline();
 
                 return false;
@@ -143,9 +180,11 @@ public class ListviewFragment extends Fragment {
                 switch (position) {
                     case 1:
                         searchType = Search.SearchType.DATE;
+                        searchView.setQueryHint("July 1");
                         break;
                     case 2:
                         searchType = Search.SearchType.LOCATION;
+                        searchView.setQueryHint("4000 Central Florida Blvd, Orlando, FL 32816");
                         break;
                     default:
                         searchType = Search.SearchType.TITLE;
@@ -274,5 +313,90 @@ public class ListviewFragment extends Fragment {
             if (entryAdapter.getItemCount() == 0) nothingHereYet.setVisibility(View.VISIBLE);
             else nothingHereYet.setVisibility(View.GONE);
         });
+    }
+
+    private Location getLocationFromAddress(String addressString) {
+        Geocoder geocoder = new Geocoder(requireActivity());
+
+        try {
+            List<Address> addresses = geocoder.getFromLocationName(addressString, 1);
+
+            if (addresses == null) {
+                return null;
+            }
+
+            Address address = addresses.get(0);
+            Location location = new Location("");
+            location.setLatitude(address.getLatitude());
+            location.setLongitude(address.getLongitude());
+            return location;
+        } catch (IOException e) {
+            Log.e(TAG, "Address string could not be converted into location.");
+        }
+
+        return null;
+    }
+
+    private GeneralDate getGeneralDate(String dateString) {
+        String[] dateComponents = dateString.split(" ");
+
+        if (dateComponents.length < 2) {
+            return null;
+        }
+
+        String monthString = dateComponents[0].toLowerCase();
+        String dayString = dateComponents[1];
+
+        int month = 0;
+        int day = 0;
+
+        try {
+            day = Integer.parseInt(dayString);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        switch (monthString) {
+            case "january":
+                month = 0;
+                break;
+            case "february":
+                month = 1;
+                break;
+            case "march":
+                month = 2;
+                break;
+            case "april":
+                month = 3;
+                break;
+            case "may":
+                month = 4;
+                break;
+            case "june":
+                month = 5;
+                break;
+            case "july":
+                month = 6;
+                break;
+            case "august":
+                month = 7;
+                break;
+            case "september":
+                month = 8;
+                break;
+            case "october":
+                month = 9;
+                break;
+            case "november":
+                month = 10;
+                break;
+            case "december":
+                month = 11;
+                break;
+            default:
+                return null;
+        }
+
+        return new GeneralDate(month, day);
     }
 }

@@ -46,7 +46,6 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -238,7 +237,7 @@ public class EntryCreateActivity extends AppCompatActivity {
                     return;
                 }
 
-                Date currentDate = new Date(System.currentTimeMillis());
+                Date currentDate = new Date();
 
                 // Put all the information together
                 entry.setTitle(title);
@@ -247,7 +246,7 @@ public class EntryCreateActivity extends AppCompatActivity {
                 entry.setMediaItems(mediaItems);
                 entry.setMediaItemDescriptions(mediaItemDescriptions);
                 entry.setVisibility(visibility);
-                entry.setUpdatedAtDay(currentDate.getDay());
+                entry.setUpdatedAtDay(currentDate.getDate());
                 entry.setUpdatedAtMonth(currentDate.getMonth());
                 if (location != null) entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");

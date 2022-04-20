@@ -1,6 +1,6 @@
 package com.group24.interactivediary.models;
 
-public abstract class Search {
+public class Search {
     public enum SearchType {
         TITLE,
         DATE,
