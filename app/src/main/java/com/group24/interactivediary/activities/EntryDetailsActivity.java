@@ -27,6 +27,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.R;
+import com.parse.ParseException;
 import com.parse.ParseUser;
 
 import org.parceler.Parcels;
@@ -143,9 +144,24 @@ public class EntryDetailsActivity extends AppCompatActivity {
             });
         }
         titleTextView.setText(entry.getTitle());
-        authorTextView.setText(entry.getAuthor().getUsername());
         timestampTextView.setText(entry.getTimestamp());
         textTextView.setText(entry.getText());
+
+        String contributorsString = "";
+        List<ParseUser> contributors = entry.getContributors();
+        for (int i = 0; i < contributors.size(); i++) {
+            try {
+                if (i != contributors.size() - 1) {
+                    contributorsString += contributors.get(i).fetchIfNeeded().getUsername() + ", ";
+                }
+                else {
+                    contributorsString += contributors.get(i).fetchIfNeeded().getUsername();
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        authorTextView.setText(contributorsString);
 
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override

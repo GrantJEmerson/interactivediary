@@ -29,17 +29,22 @@ import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.group24.interactivediary.fragments.listview.ListviewViewModel;
+import com.group24.interactivediary.models.DiaryUser;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.R;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+
+import net.cachapa.expandablelayout.ExpandableLayout;
 
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -58,6 +63,8 @@ public class EntryCreateActivity extends AppCompatActivity {
     private RadioButton privateRadioButton;
     private RadioButton sharedRadioButton;
     private RadioButton publicRadioButton;
+    private ExpandableLayout contributorsExpandableLayout;
+    private EditText contributorsEditText;
     private Button postButton;
 
     // Other necessary member variables
@@ -83,6 +90,8 @@ public class EntryCreateActivity extends AppCompatActivity {
         privateRadioButton = findViewById(R.id.createEntryPrivateRadioButton);
         sharedRadioButton = findViewById(R.id.createEntrySharedRadioButton);
         publicRadioButton = findViewById(R.id.createEntryPublicRadioButton);
+        contributorsExpandableLayout = findViewById(R.id.entryCreateAddContributorsExpandableLayout);
+        contributorsEditText = findViewById(R.id.entryCreateAddContributorEditText);
         postButton = findViewById(R.id.createEntryPostButton);
 
         // Initialize other member variables
@@ -99,32 +108,75 @@ public class EntryCreateActivity extends AppCompatActivity {
         entry = (Entry) Parcels.unwrap(getIntent().getParcelableExtra(Entry.class.getSimpleName()));
 
         if (entry != null) { // an entry was passed in via Parcel, so we are editing a preexisting entry
+            getSupportActionBar().setTitle(R.string.edit_an_entry);
             // put in all the existing data
             titleEditText.setText(entry.getTitle());
             textEditText.setText(entry.getText());
             // TODO: handle media
+
+            String contributorsString = "";
+            List<ParseUser> contributors = entry.getContributors();
+            for (int i = 0; i < contributors.size(); i++) {
+                try {
+                    if (i != contributors.size() - 1) {
+                        contributorsString += contributors.get(i).fetchIfNeeded().getUsername() + ", ";
+                    }
+                    else {
+                        contributorsString += contributors.get(i).fetchIfNeeded().getUsername();
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            contributorsEditText.setText(contributorsString);
+
             switch (entry.getVisibility()) {
                 case PRIVATE:
                     privateRadioButton.setChecked(true);
                     sharedRadioButton.setChecked(false);
                     publicRadioButton.setChecked(false);
+                    contributorsExpandableLayout.collapse();
                     break;
                 case SHARED:
                     privateRadioButton.setChecked(false);
                     sharedRadioButton.setChecked(true);
                     publicRadioButton.setChecked(false);
+                    contributorsExpandableLayout.expand();
                     break;
                 case PUBLIC:
                 default:
                     privateRadioButton.setChecked(false);
                     sharedRadioButton.setChecked(false);
                     publicRadioButton.setChecked(true);
+                    contributorsExpandableLayout.collapse();
                     break;
             }
         }
         else {
             entry = new Entry();
         }
+
+        // Set up listener to expand ExpandableLayout when entry is made Shared
+        sharedRadioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                contributorsExpandableLayout.expand();
+            }
+        });
+
+        // Set up listeners to collapse ExpandableLayout when entry is made Private or Public
+        privateRadioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                contributorsExpandableLayout.collapse();
+            }
+        });
+        publicRadioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                contributorsExpandableLayout.collapse();
+            }
+        });
 
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,23 +199,33 @@ public class EntryCreateActivity extends AppCompatActivity {
 
                 Entry.Visibility visibility;
                 List<ParseUser> contributors = new ArrayList<>();
-                contributors.add(ParseUser.getCurrentUser());
                 if (privateRadioButton.isChecked()) {
                     visibility = Entry.Visibility.PRIVATE;
+                    contributors.add(ParseUser.getCurrentUser()); // Add yourself to contributors list
                 }
                 else if (sharedRadioButton.isChecked()) {
                     visibility = Entry.Visibility.SHARED;
-                    // TODO: for each user the user adds as a contributor, add them to the list here
+                    String[] contributorsUsernames = contributorsEditText.getText().toString().split(", "); // Take in as comma-separated list of names
+                    for (String username : contributorsUsernames) {
+                        ParseQuery<ParseUser> userQuery = ParseUser.getQuery();
+                        userQuery.whereEqualTo(DiaryUser.KEY_USERNAME, username);
+                        try {
+                            contributors.add(userQuery.getFirst());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 else if (publicRadioButton.isChecked()) {
                     visibility = Entry.Visibility.PUBLIC;
+                    contributors.add(ParseUser.getCurrentUser()); // Add yourself to contributors list
                 }
                 else {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.entry_type_is_empty), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                Date currentDate = new Date();
+                Date currentDate = new Date(System.currentTimeMillis());
 
                 // Put all the information together
                 entry.setTitle(title);

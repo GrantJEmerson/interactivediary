@@ -16,6 +16,7 @@ import java.util.List;
 // Extending the ParseUser class is not recommended, so I am doing this instead
 public class DiaryUser {
     public static final String TAG = "DiaryUser";
+    public static final String KEY_USERNAME = "username";
     public static final String KEY_PROFILE_PICTURE = "profilePicture";
     public static final String KEY_GETS_NOTIFICATIONS = "getNotifications";
 

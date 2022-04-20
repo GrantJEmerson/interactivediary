@@ -66,7 +66,7 @@
                 android:id="@+id/entryDetailsAuthorTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="by Meghan" />
+                tools:text="Meghan" />
 
             <TextView
                 android:id="@+id/entryDetailsTimestampTextView"

@@ -86,6 +86,24 @@
                     android:layout_height="wrap_content"
                     android:text="@string/sharedButton" />
 
+                <net.cachapa.expandablelayout.ExpandableLayout
+                    android:id="@+id/entryCreateAddContributorsExpandableLayout"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    app:el_duration="1000"
+                    app:el_expanded="false"
+                    app:el_parallax="0.5">
+
+                    <EditText
+                        android:id="@+id/entryCreateAddContributorEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/add_contributors_here"
+                        android:textSize="15sp" />
+
+                </net.cachapa.expandablelayout.ExpandableLayout>
+
                 <RadioButton
                     android:id="@+id/createEntryPublicRadioButton"
                     android:layout_width="match_parent"
