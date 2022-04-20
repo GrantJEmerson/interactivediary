@@ -149,19 +149,23 @@ public class EntryDetailsActivity extends AppCompatActivity {
 
         String contributorsString = "";
         List<ParseUser> contributors = entry.getContributors();
-        for (int i = 0; i < contributors.size(); i++) {
-            try {
-                if (i != contributors.size() - 1) {
-                    contributorsString += contributors.get(i).fetchIfNeeded().getUsername() + ", ";
-                }
-                else {
-                    contributorsString += contributors.get(i).fetchIfNeeded().getUsername();
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+        if (contributors.size() == 0) {
+            authorTextView.setText(entry.getAuthor().getUsername());
         }
-        authorTextView.setText(contributorsString);
+        else {
+            for (int i = 0; i < contributors.size(); i++) {
+                try {
+                    if (i != contributors.size() - 1) {
+                        contributorsString += contributors.get(i).fetchIfNeeded().getUsername() + ", ";
+                    } else {
+                        contributorsString += contributors.get(i).fetchIfNeeded().getUsername();
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            authorTextView.setText(entry.getAuthor().getUsername() + ", " + contributorsString);
+        }
 
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override

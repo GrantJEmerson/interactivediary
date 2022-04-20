@@ -109,7 +109,7 @@ public class EntryCreateActivity extends AppCompatActivity {
 
         if (entry != null) { // an entry was passed in via Parcel, so we are editing a preexisting entry
             getSupportActionBar().setTitle(R.string.edit_an_entry);
-            // put in all the existing data
+            // Put in all the existing data
             titleEditText.setText(entry.getTitle());
             textEditText.setText(entry.getText());
             // TODO: handle media
@@ -154,6 +154,7 @@ public class EntryCreateActivity extends AppCompatActivity {
         }
         else {
             entry = new Entry();
+            entry.setAuthor(ParseUser.getCurrentUser());
         }
 
         // Set up listener to expand ExpandableLayout when entry is made Shared
@@ -201,7 +202,6 @@ public class EntryCreateActivity extends AppCompatActivity {
                 List<ParseUser> contributors = new ArrayList<>();
                 if (privateRadioButton.isChecked()) {
                     visibility = Entry.Visibility.PRIVATE;
-                    contributors.add(ParseUser.getCurrentUser()); // Add yourself to contributors list
                 }
                 else if (sharedRadioButton.isChecked()) {
                     visibility = Entry.Visibility.SHARED;
@@ -218,7 +218,6 @@ public class EntryCreateActivity extends AppCompatActivity {
                 }
                 else if (publicRadioButton.isChecked()) {
                     visibility = Entry.Visibility.PUBLIC;
-                    contributors.add(ParseUser.getCurrentUser()); // Add yourself to contributors list
                 }
                 else {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.entry_type_is_empty), Toast.LENGTH_SHORT).show();
@@ -229,7 +228,6 @@ public class EntryCreateActivity extends AppCompatActivity {
 
                 // Put all the information together
                 entry.setTitle(title);
-                entry.setAuthor(ParseUser.getCurrentUser());
                 entry.setContributors(contributors);
                 entry.setText(text);
                 entry.setMediaItems(mediaItems);

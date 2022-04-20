@@ -61,9 +61,7 @@
     <string name="we_need_location_permissions_for_mapview">We need permission to access your location in order to use Map View.</string>
     <string name="location_permissions_granted">Location permissions granted.</string>
     <string name="location_permissions_denied">Location permissions denied.</string>
-    <string name="search_hint">Search entries...</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_hint">Search entries...</string>=
     <string name="edit_entry">Edit entry</string>
     <string name="edit_an_entry">Edit an Entry</string>
     <string name="add_contributors_here">Type the usernames of whoever you want to add to the entry!</string>
