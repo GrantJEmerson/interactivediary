@@ -17,7 +17,6 @@
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_dashboard.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_first.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_first2.xml" value="0.25416666666666665" />
-        <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_google_maps.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_home.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_listview.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/layout/fragment_mapview.xml" value="0.25416666666666665" />
@@ -31,6 +30,8 @@
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/menu/main_menu.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/mlin2/Desktop/UCF/4. Spring 2022/Object Oriented/interactivediary/app/src/main/res/menu/menu_main.xml" value="0.25416666666666665" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.17708333333333334" />
+        <entry key="app/src/main/res/layout/activity_profile.xml" value="0.2429078014184397" />
+        <entry key="app/src/main/res/menu/main_menu.xml" value="0.335" />
       </map>
     </option>
   </component>
