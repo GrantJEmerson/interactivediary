@@ -2,12 +2,12 @@
     <!-- Base application theme. -->
     <style name="Theme.InteractiveDiary" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">@color/mid_teal</item>
+        <item name="colorPrimaryVariant">@color/teal_700</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorSecondary">@color/light_gold</item>
+        <item name="colorSecondaryVariant">@color/gold</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
@@ -23,4 +23,33 @@
     <style name="Theme.InteractiveDiary.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.InteractiveDiary.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AppTheme.Widget.ActionButton" parent="@style/Widget.AppCompat.ActionButton">
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="HorizontalTransitions" parent="Theme.InteractiveDiary.NoActionBar">
+        <!-- specify enter and exit transitions-->
+        <item name="android:windowAnimationStyle">@style/HorizontalTransitionAnimations</item>
+    </style>
+
+    <style name="VerticalTransitions" parent="Theme.InteractiveDiary.NoActionBar">
+        <!-- specify enter and exit transitions-->
+        <item name="android:windowAnimationStyle">@style/VerticalTransitionAnimations</item>
+    </style>
+
+    <style name="HorizontalTransitionAnimations" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
+
+    <style name="VerticalTransitionAnimations" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_down</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_up</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_up</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_down</item>
+    </style>
 </resources>

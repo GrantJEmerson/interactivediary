@@ -129,6 +129,10 @@ public class HomeActivity extends AppCompatActivity {
                 listviewViewModel.setVisibility(Entry.Visibility.PRIVATE);
                 listviewViewModel.setNothingHereYetText(getResources().getString(R.string.private_nothing_here_yet));
                 mapviewViewModel.setVisibility(Entry.Visibility.PRIVATE);
+                // Change button colors
+                privateButton.setBackgroundColor(getResources().getColor(R.color.gold));
+                sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
             }
         });
 
@@ -139,6 +143,10 @@ public class HomeActivity extends AppCompatActivity {
                 listviewViewModel.setVisibility(Entry.Visibility.SHARED);
                 listviewViewModel.setNothingHereYetText(getResources().getString(R.string.shared_nothing_here_yet));
                 mapviewViewModel.setVisibility(Entry.Visibility.SHARED);
+                // Change button colors
+                privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                sharedButton.setBackgroundColor(getResources().getColor(R.color.gold));
+                publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
             }
         });
 
@@ -149,6 +157,10 @@ public class HomeActivity extends AppCompatActivity {
                 listviewViewModel.setVisibility(Entry.Visibility.PUBLIC);
                 listviewViewModel.setNothingHereYetText(getResources().getString(R.string.public_nothing_here_yet));
                 mapviewViewModel.setVisibility(Entry.Visibility.PUBLIC);
+                // Change button colors
+                privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                publicButton.setBackgroundColor(getResources().getColor(R.color.gold));
             }
         });
 
@@ -235,7 +247,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void displayListviewFragment() {
-        FragmentTransaction ft = fragmentManager.beginTransaction();
+        FragmentTransaction ft = fragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_left, 0, 0, R.anim.slide_out_left);
         if (listviewFragment.isAdded()) { // if the fragment is already in container
             ft.show(listviewFragment);
         }
@@ -251,7 +263,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void displayMapviewFragment() {
-        FragmentTransaction ft = fragmentManager.beginTransaction();
+        FragmentTransaction ft = fragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_right, 0, 0, R.anim.slide_out_right);
         if (mapviewFragment.isAdded()) { // if the fragment is already in container
             ft.show(mapviewFragment);
         }
