@@ -4,20 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -37,20 +33,21 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -102,7 +99,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
     private Toolbar toolbar;
     private EditText titleEditText;
     private LinearLayout mediaLinearLayout;
-    private Button addMediaImageButton;
+    private Button addMediaButton;
     private EditText textEditText;
     private RadioButton privateRadioButton;
     private RadioButton sharedRadioButton;
@@ -134,7 +131,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
         toolbar = findViewById(R.id.toolbar);
         titleEditText = findViewById(R.id.entryCreateTitleEditText);
         mediaLinearLayout = findViewById(R.id.entryCreateMediaLinearLayout);
-        addMediaImageButton = findViewById(R.id.entryCreateAddMediaButton);
+        addMediaButton = findViewById(R.id.entryCreateAddMediaButton);
         textEditText = findViewById(R.id.entryCreateTextEditText);
         privateRadioButton = findViewById(R.id.createEntryPrivateRadioButton);
         sharedRadioButton = findViewById(R.id.createEntrySharedRadioButton);
@@ -240,30 +237,12 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
         });
 
         // Set up add media button
-        addMediaImageButton.setOnClickListener(new View.OnClickListener() {
+        addMediaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder cameraOrGalleryDialog = new AlertDialog.Builder(context)
-                        .setTitle(getResources().getString(R.string.capture_media_with_camera))
-                        .setMessage(getResources().getString(R.string.upload_media_from_gallery))
-                        .setIcon(R.drawable.ic_baseline_image_24)
-                        .setPositiveButton(R.string.capture_media_with_camera, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                hideSoftKeyboard(relativeLayout);
-                                launchCamera();
-                            }
-                        })
-                        .setNegativeButton(R.string.upload_media_from_gallery, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                hideSoftKeyboard(relativeLayout);
-                                getPermissionToReadExternalStorage(context);
-                                pickMedia();
-                            }
-                        });
-
-                cameraOrGalleryDialog.show();
+                registerForContextMenu(addMediaButton);
+                openContextMenu(view);
+                unregisterForContextMenu(addMediaButton);
             }
         });
 
@@ -379,6 +358,31 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_CANCELED, returnIntent);
                 finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.media_select_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.cameraMenuItem:
+                hideSoftKeyboard(relativeLayout);
+                launchCamera();
+                return true;
+            case R.id.galleryMenuItem:
+                 hideSoftKeyboard(relativeLayout);
+                 getPermissionToReadExternalStorage(context);
+                 pickMedia();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
