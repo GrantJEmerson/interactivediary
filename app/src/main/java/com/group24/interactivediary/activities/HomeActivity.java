@@ -8,6 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -68,6 +72,9 @@ public class HomeActivity extends AppCompatActivity {
     private MapviewViewModel mapviewViewModel;
     private LocationManager locationManager;
     private Location location;
+    private NetworkRequest networkRequest;
+    private ConnectivityManager.NetworkCallback networkCallback;
+    private boolean internetAccessLost = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +158,40 @@ public class HomeActivity extends AppCompatActivity {
                 goEntryCreateActivity();
             }
         });
+
+        networkRequest = new NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .build();
+        Context context = this;
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                super.onAvailable(network);
+                if (internetAccessLost) {
+                    Toast.makeText(context, getResources().getText(R.string.app_back_online), Toast.LENGTH_SHORT).show();
+                    fab.setEnabled(true);
+                    internetAccessLost = false;
+                }
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                super.onLost(network);
+                Toast.makeText(context, getResources().getText(R.string.internet_access_lost), Toast.LENGTH_SHORT).show();
+                fab.setEnabled(false);
+                internetAccessLost = true;
+            }
+
+            @Override
+            public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                super.onCapabilitiesChanged(network, networkCapabilities);
+            }
+        };
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(ConnectivityManager.class);
+        connectivityManager.requestNetwork(networkRequest, networkCallback);
     }
 
     @Override

@@ -23,6 +23,8 @@
     <string name="title_listview">List View</string>
     <string name="title_mapview">Map View</string>
     <string name="deleteEntryMenuItem">Delete</string>
+    <string name="internet_access_lost">Internet access lost. App functionality will be limited.</string>
+    <string name="app_back_online">Back online. Pull down to refresh the feed.</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="privateTab">Private</string>
