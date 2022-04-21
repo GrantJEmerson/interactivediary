@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -122,6 +123,40 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         // Set up the top nav bar
+        // Listen for visibility being changed
+        listviewViewModel.getVisibility().observe(this, new Observer<Entry.Visibility>() {
+            @Override
+            public void onChanged(Entry.Visibility selectedVisibility) {
+                Log.e(TAG, selectedVisibility+"");
+                switch (selectedVisibility) {
+                    case PRIVATE:
+                        Log.e(TAG, "PRIVATE AAAAAAAAAAAAAA");
+                        privateButton.setBackgroundColor(getResources().getColor(R.color.gold));
+                        sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        break;
+                    case SHARED:
+                        Log.e(TAG, "SHARED AAAAAAAAAAAAAA");
+                        privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        sharedButton.setBackgroundColor(getResources().getColor(R.color.gold));
+                        publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        break;
+                    case PUBLIC:
+                        Log.e(TAG, "PUBLIC AAAAAAAAAAAAAA");
+                        privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        publicButton.setBackgroundColor(getResources().getColor(R.color.gold));
+                        break;
+                    default:
+                        Log.e(TAG, "DEFAULT AAAAAAAAAAAAAA");
+                        privateButton.setBackgroundColor(getResources().getColor(R.color.gold));
+                        sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
+                        break;
+                }
+            }
+        });
+
         privateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -129,10 +164,6 @@ public class HomeActivity extends AppCompatActivity {
                 listviewViewModel.setVisibility(Entry.Visibility.PRIVATE);
                 listviewViewModel.setNothingHereYetText(getResources().getString(R.string.private_nothing_here_yet));
                 mapviewViewModel.setVisibility(Entry.Visibility.PRIVATE);
-                // Change button colors
-                privateButton.setBackgroundColor(getResources().getColor(R.color.gold));
-                sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
-                publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
             }
         });
 
@@ -143,10 +174,6 @@ public class HomeActivity extends AppCompatActivity {
                 listviewViewModel.setVisibility(Entry.Visibility.SHARED);
                 listviewViewModel.setNothingHereYetText(getResources().getString(R.string.shared_nothing_here_yet));
                 mapviewViewModel.setVisibility(Entry.Visibility.SHARED);
-                // Change button colors
-                privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
-                sharedButton.setBackgroundColor(getResources().getColor(R.color.gold));
-                publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
             }
         });
 
@@ -157,10 +184,6 @@ public class HomeActivity extends AppCompatActivity {
                 listviewViewModel.setVisibility(Entry.Visibility.PUBLIC);
                 listviewViewModel.setNothingHereYetText(getResources().getString(R.string.public_nothing_here_yet));
                 mapviewViewModel.setVisibility(Entry.Visibility.PUBLIC);
-                // Change button colors
-                privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
-                sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
-                publicButton.setBackgroundColor(getResources().getColor(R.color.gold));
             }
         });
 

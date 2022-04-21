@@ -36,7 +36,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="@color/gold"
             android:text="@string/privateTab"
+            app:cornerRadius="0dp"
             app:icon="@drawable/ic_baseline_person_24" />
 
         <Button
@@ -46,6 +48,7 @@
             android:layout_toRightOf="@id/homePrivateButton"
             android:layout_weight="1"
             android:text="@string/sharedTab"
+            app:cornerRadius="0dp"
             app:icon="@drawable/ic_baseline_people_24" />
 
         <Button
@@ -55,6 +58,7 @@
             android:layout_toRightOf="@id/homeSharedButton"
             android:layout_weight="1"
             android:text="@string/publicTab"
+            app:cornerRadius="0dp"
             app:icon="@drawable/ic_baseline_public_24" />
     </LinearLayout>
 
