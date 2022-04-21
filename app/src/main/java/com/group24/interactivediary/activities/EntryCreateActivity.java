@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
@@ -15,22 +16,32 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.group24.interactivediary.fragments.listview.ListviewViewModel;
 import com.group24.interactivediary.models.DiaryUser;
@@ -47,6 +58,7 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 
 import org.parceler.Parcels;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -72,12 +84,15 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
     private RadioButton publicRadioButton;
     private ExpandableLayout contributorsExpandableLayout;
     private EditText contributorsEditText;
+    private Switch locationSwitch;
     private Button postButton;
 
     // Other necessary member variables
-    Entry entry;
-    LocationManager locationManager;
-    ParseGeoPoint geoPointLocation;
+    private Entry entry;
+    private LocationManager locationManager;
+    private Location location;
+    private ParseGeoPoint geoPointLocation;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +111,11 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
         publicRadioButton = findViewById(R.id.createEntryPublicRadioButton);
         contributorsExpandableLayout = findViewById(R.id.entryCreateAddContributorsExpandableLayout);
         contributorsEditText = findViewById(R.id.entryCreateAddContributorEditText);
+        locationSwitch = findViewById(R.id.createEntryLocationSwitch);
         postButton = findViewById(R.id.createEntryPostButton);
 
         // Initialize other member variables
+        context = this;
 
         // Set up toolbar
         toolbar.setTitleTextColor(getResources().getColor(R.color.white, getTheme()));
@@ -111,26 +128,65 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
 
         if (entry != null) { // an entry was passed in via Parcel, so we are editing a preexisting entry
             getSupportActionBar().setTitle(R.string.edit_an_entry);
-            // Put in all the existing data
+            // Bind all the entry's existing data to the layout
+            List<List> mediaItemsLists = entry.getMediaItems();
+            // Images
+            for (Object imagePairObject : mediaItemsLists.get(0)) {
+                Pair<Bitmap, String> imagePair = (Pair<Bitmap, String>) imagePairObject;
+
+                // Make new ImageView and set layout params
+                ImageView imageView = new ImageView(this);
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(10, 10, 10, 10);
+                imageView.setLayoutParams(layoutParams);
+                int imageId = ViewCompat.generateViewId();
+                imageView.setId(imageId);
+                // Add ImageView to CardView
+                mediaCardView.addView(imageView);
+
+                Glide.with(this)
+                        .load(imagePair.first)
+                        .into(imageView);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Add media item description on click
+                        TextView mediaItemDescription = new TextView(context);
+                        mediaItemDescription.setText(imagePair.second);
+                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        layoutParams.addRule(RelativeLayout.BELOW, imageId);
+                        mediaItemDescription.setLayoutParams(layoutParams);
+                    }
+                });
+            }
+            // Videos
+            for (Object videoPairObject : mediaItemsLists.get(1)) {
+                Pair<File, String> videoPair = (Pair<File, String>) videoPairObject;
+
+                // Make new VideoView and set layout params
+                VideoView videoView = new VideoView(this);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(10, 10, 10, 10);
+                videoView.setLayoutParams(layoutParams);
+                int videoId = ViewCompat.generateViewId();
+                videoView.setId(videoId);
+                // Add VideoView to CardView
+                mediaCardView.addView(videoView);
+                videoView.setVideoURI(Uri.fromFile(videoPair.first)); // if doesn't work, try Uri.parse instead
+                videoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Add media item description on click
+                        TextView mediaItemDescription = new TextView(context);
+                        mediaItemDescription.setText(videoPair.second);
+                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        layoutParams.addRule(RelativeLayout.BELOW, videoId);
+                        mediaItemDescription.setLayoutParams(layoutParams);
+                    }
+                });
+            }
             titleEditText.setText(entry.getTitle());
             textEditText.setText(entry.getText());
-            // TODO: handle media
-
-            String contributorsString = "";
-            List<ParseUser> contributors = entry.getContributors();
-            for (int i = 0; i < contributors.size(); i++) {
-                try {
-                    if (i != contributors.size() - 1) {
-                        contributorsString += contributors.get(i).fetchIfNeeded().getUsername() + ", ";
-                    }
-                    else {
-                        contributorsString += contributors.get(i).fetchIfNeeded().getUsername();
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-            contributorsEditText.setText(contributorsString);
 
             switch (entry.getVisibility()) {
                 case PRIVATE:
@@ -153,6 +209,8 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                     contributorsExpandableLayout.collapse();
                     break;
             }
+            if (entry.getLocation() != null) locationSwitch.setChecked(true);
+            else locationSwitch.setChecked(false);
         }
         else {
             entry = new Entry();
@@ -178,6 +236,14 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
             @Override
             public void onClick(View view) {
                 contributorsExpandableLayout.collapse();
+            }
+        });
+
+        locationSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (locationSwitch.isChecked()) getPermissionToAccessFineLocation();
+                else location = null;
             }
         });
 
