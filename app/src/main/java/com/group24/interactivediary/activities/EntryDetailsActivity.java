@@ -205,25 +205,17 @@ public class EntryDetailsActivity extends AppCompatActivity {
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(10, 10, 10, 10);
             imageView.setLayoutParams(layoutParams);
+            imageView.getLayoutParams().height = 1000;
+            imageView.getLayoutParams().width = 1000;
             int imageId = ViewCompat.generateViewId();
             imageView.setId(imageId);
             // Add ImageView to CardView
             mediaCardView.addView(imageView);
+            Log.e(TAG, "added " + imageView.getId());
 
             Glide.with(this)
                     .load(imagePair.first)
                     .into(imageView);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Add media item description on click
-                    TextView mediaItemDescription = new TextView(context);
-                    mediaItemDescription.setText(imagePair.second);
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    layoutParams.addRule(RelativeLayout.BELOW, imageId);
-                    mediaItemDescription.setLayoutParams(layoutParams);
-                }
-            });
         }
         // Videos
         for (Object videoPairObject : mediaItemsLists.get(1)) {
@@ -239,17 +231,6 @@ public class EntryDetailsActivity extends AppCompatActivity {
             // Add VideoView to CardView
             mediaCardView.addView(videoView);
             videoView.setVideoURI(Uri.fromFile(videoPair.first)); // if doesn't work, try Uri.parse instead
-            videoView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Add media item description on click
-                    TextView mediaItemDescription = new TextView(context);
-                    mediaItemDescription.setText(videoPair.second);
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    layoutParams.addRule(RelativeLayout.BELOW, videoId);
-                    mediaItemDescription.setLayoutParams(layoutParams);
-                }
-            });
         }
         titleTextView.setText(entry.getTitle());
         timestampTextView.setText(entry.getTimestamp());

@@ -89,10 +89,9 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.ViewHolder> 
         public void bind(Entry entry) {
             List<List> mediaItemsLists = entry.getMediaItems();
             if (!mediaItemsLists.get(0).isEmpty()) {
-                Bitmap first = ((Pair<Bitmap, String>) mediaItemsLists.get(0)).first;
+                Bitmap first = ((Pair<Bitmap, String>) mediaItemsLists.get(0).get(0)).first;
                 Glide.with(context)
                         .load(first)
-                        .circleCrop()
                         .into(mediaImageView);
             }
             titleTextView.setText(entry.getTitle());

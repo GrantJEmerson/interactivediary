@@ -130,24 +130,23 @@ public class Entry extends ParseObject implements Parcelable {
             try {
                 File mediaItemFile = mediaItemPFiles.get(i).getFile();
                 String mediaItemFilePath = mediaItemFile.getPath();
-                String mimeType = "";
+                /*String mimeType = "";
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     try {
                         mimeType = Files.probeContentType(mediaItemFile.toPath());
+                        if (mimeType.startsWith("image")) {*/
+                            Bitmap bitmap = BitmapFactory.decodeFile(mediaItemFilePath);
+                            images.add(new Pair<Bitmap, String>(bitmap, getMediaItemDescriptions().get(i)));
+                        /*}
+
+                        if (mimeType.startsWith("video")) {
+                            videos.add(new Pair<File, String>(mediaItemFile, getMediaItemDescriptions().get(i)));
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-
-                if (mimeType.startsWith("image")) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(mediaItemFilePath);
-                    images.add(new Pair<Bitmap, String>(bitmap, getMediaItemDescriptions().get(i)));
-                }
-
-                if (mimeType.startsWith("video")) {
-                    videos.add(new Pair<File, String>(mediaItemFile, getMediaItemDescriptions().get(i)));
-                }
+                }*/
             } catch (ParseException e) {
                 Log.e(TAG, "Could not download media item: " + e.getLocalizedMessage());
             }
@@ -162,18 +161,12 @@ public class Entry extends ParseObject implements Parcelable {
         put(KEY_MEDIA_ITEMS, mediaItems);
     }
 
-    public void addMediaItem(ParseFile mediaItem) {
-        List<ParseFile> mediaItems = getList(KEY_MEDIA_ITEMS);
-        mediaItems.add(mediaItem);
-        put(KEY_MEDIA_ITEMS, mediaItems);
-    }
-
     public List<String> getMediaItemDescriptions() {
         return getList(KEY_MEDIA_ITEM_DESCRIPTIONS);
     }
 
     public void setMediaItemDescriptions(List<String> mediaItemDescriptions) {
-        put(KEY_MEDIA_ITEMS, mediaItemDescriptions);
+        put(KEY_MEDIA_ITEM_DESCRIPTIONS, mediaItemDescriptions);
     }
 
     public void addMediaItemDescription(String mediaItemDescription) {

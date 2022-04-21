@@ -55,6 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/add_media"
+                android:src="@android:drawable/ic_menu_gallery"
                 tools:srcCompat="@tools:sample/avatars" />
 
             <EditText
@@ -110,6 +111,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/publicButton" />
             </RadioGroup>
+
+            <Switch
+                android:id="@+id/createEntryLocationSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_location_to_entry" />
 
             <Button
                 android:id="@+id/createEntryPostButton"

@@ -66,4 +66,14 @@
     <string name="edit_entry">Edit entry</string>
     <string name="edit_an_entry">Edit an Entry</string>
     <string name="add_contributors_here">Type the usernames of whoever you want to add to the entry!</string>
+    <string name="add_location_to_entry">Add location to entry?</string>
+    <string name="no_camera">You have no camera app that InteractiveDiary can use to take a photo or video.</string>
+    <string name="no_gallery">You have no gallery app that InteractiveDiary can use to upload a photo or video.</string>
+    <string name="error_camera_media">Something went wrong capturing the media, please try again.</string>
+    <string name="error_gallery_media">Something went wrong uploading the media, please try again</string>
+    <string name="capture_media_with_camera">Capture media with camera</string>
+    <string name="upload_media_from_gallery">Upload media from gallery</string>
+    <string name="add_media_description">Add an optional media description here.</string>
+    <string name="send_it">Send it!</string>
+    <string name="nevermind">Never mind...</string>
 </resources>
