@@ -791,4 +791,19 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
         }
         else return true;
     }
+
+    @Override
+    public void onProviderEnabled(@NonNull String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider) {
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
 }

@@ -6,19 +6,18 @@
     android:layout_height="wrap_content"
     android:padding="10dp">
 
-
     <ImageView
         android:id="@+id/entryImageImageView"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
         android:id="@+id/entryTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/entryImageImageView"
         android:textSize="20sp"
         tools:text="Day at the beach" />
@@ -28,6 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/entryTitle"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/entryImageImageView"
         tools:text="by Meghan" />
 
@@ -36,6 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/entryAuthorTextView"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/entryImageImageView"
         tools:text="Wed Aug 24 2042" />
 
@@ -44,6 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/entryTimestampTextView"
+        android:layout_marginLeft="10dp"
         android:layout_toRightOf="@id/entryImageImageView"
         android:ellipsize="end"
         android:maxLines="4"
