@@ -89,10 +89,16 @@ public class EntryAdapter extends RecyclerView.Adapter<EntryAdapter.ViewHolder> 
         public void bind(Entry entry) {
             List<List> mediaItemsLists = entry.getMediaItems();
             if (!mediaItemsLists.get(0).isEmpty()) {
+                mediaImageView.setVisibility(View.VISIBLE);
                 Bitmap first = ((Pair<Bitmap, String>) mediaItemsLists.get(0).get(0)).first;
                 Glide.with(context)
                         .load(first)
+                        .centerInside()
+                        .centerCrop()
                         .into(mediaImageView);
+            }
+            else { // get rid of imageview
+                mediaImageView.setVisibility(View.GONE);
             }
             titleTextView.setText(entry.getTitle());
             timestampTextView.setText(entry.getTimestamp());
