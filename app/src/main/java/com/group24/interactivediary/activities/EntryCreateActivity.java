@@ -9,14 +9,17 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,7 +51,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class EntryCreateActivity extends AppCompatActivity {
+public class EntryCreateActivity extends AppCompatActivity implements LocationListener {
     public static final String TAG = "EntryCreateActivity";
 
     public static final int CREATE_ACTIVITY = 5732787; // just an arbitrary number
@@ -74,7 +77,6 @@ public class EntryCreateActivity extends AppCompatActivity {
     // Other necessary member variables
     Entry entry;
     LocationManager locationManager;
-    Location location;
     ParseGeoPoint geoPointLocation;
 
     @Override
@@ -235,7 +237,7 @@ public class EntryCreateActivity extends AppCompatActivity {
                 entry.setVisibility(visibility);
                 entry.setUpdatedAtDay(currentDate.getDate());
                 entry.setUpdatedAtMonth(currentDate.getMonth());
-                if (location != null) entry.setLocation(geoPointLocation);
+                if (geoPointLocation != null) entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");
                 entry.saveInBackground(new SaveCallback() {
                     @Override
@@ -256,6 +258,11 @@ public class EntryCreateActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        this.geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
     }
 
     @Override
@@ -333,6 +340,18 @@ public class EntryCreateActivity extends AppCompatActivity {
         });
     }
 
+    private void setUpLocationManager() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (locationManager == null) {
+                locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            }
+
+            locationManager.requestSingleUpdate(LocationManager.GPS_PROVIDER, this, Looper.getMainLooper());
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+        }
+    }
+
     // Called when the user is performing an action which requires the app to access the user's location
     public void getPermissionToAccessFineLocation() {
         // 1) Use the support library version ContextCompat.checkSelfPermission(...) to avoid
@@ -343,14 +362,19 @@ public class EntryCreateActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             // The permission is NOT already granted.
+            // Check if the user has been asked about this permission already and denied
+            // it. If so, we want to give more explanation about why the permission is needed.
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show our own UI to explain to the user why we need to access location
+                // before actually requesting the permission and showing the default UI
+//                weNeedLocationPermissions.setVisibility(View.VISIBLE);
+            }
 
             // Fire off an async request to actually get the permission
             // This will show the standard permission request dialog UI
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST);
-        }
-        else {
-            location = getCurrentUserLocation();
-            geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+        } else {
+            setUpLocationManager();
         }
     }
 
@@ -362,17 +386,16 @@ public class EntryCreateActivity extends AppCompatActivity {
             // Permission has been granted
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, getResources().getText(R.string.location_permissions_granted), Toast.LENGTH_SHORT).show();
-
-                // Get location
-                location = getCurrentUserLocation();
-                geoPointLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-            }
-            // Permission has been denied
-            else {
+                setUpLocationManager();
+            } else {
                 // showRationale = false if user clicks Never Ask Again, otherwise true
                 boolean showRationale = shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
 
-                if (!showRationale) {
+                if (showRationale) {
+//                    weNeedLocationPermissions.setVisibility(View.VISIBLE);
+                }
+                else {
+//                    weNeedLocationPermissions.setVisibility(View.GONE);
                     Toast.makeText(this, getResources().getText(R.string.location_permissions_denied), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -381,12 +404,11 @@ public class EntryCreateActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private Location getCurrentUserLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (locationManager == null) {
-                locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-                return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            }
+        Log.e(TAG, "getCurrentUserLocation called");
+        if (locationManager != null) {
+            return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         }
         return null;
     }

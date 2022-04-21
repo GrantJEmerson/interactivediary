@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.maps.model.Polygon;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.models.GeneralDate;
 import com.group24.interactivediary.models.Search;
@@ -181,6 +182,11 @@ public class EntryManager {
                     geoPoint.setLatitude(searchLocation.getLatitude());
 
                     entryQuery.whereWithinMiles(Entry.KEY_LOCATION, geoPoint, 20);
+                    break;
+                case POLYGON:
+                    ParsePolygon polygon = (ParsePolygon) search.searchParameter;
+
+                    entryQuery.whereWithinPolygon("location", polygon);
                     break;
             }
         }
