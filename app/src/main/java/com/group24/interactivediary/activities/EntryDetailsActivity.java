@@ -46,7 +46,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
     private TextView titleTextView;
     private TextView authorTextView;
     private TextView timestampTextView;
-    private CardView mediaCardView;
+    private LinearLayout mediaLinearLayout;
     private TextView textTextView;
     private Button editButton;
 
@@ -65,7 +65,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
         titleTextView = findViewById(R.id.entryDetailsTitleTextView);
         authorTextView = findViewById(R.id.entryDetailsAuthorTextView);
         timestampTextView = findViewById(R.id.entryDetailsTimestampTextView);
-        mediaCardView = findViewById(R.id.entryDetailsMediaCardView);
+        mediaLinearLayout = findViewById(R.id.entryDetailsMediaLinearLayout);
         textTextView = findViewById(R.id.entryDetailsTextTextView);
         editButton = findViewById(R.id.entryDetailsEditButton);
 
@@ -210,10 +210,10 @@ public class EntryDetailsActivity extends AppCompatActivity {
             imageView.requestLayout();
             int imageId = ViewCompat.generateViewId();
             imageView.setId(imageId);
-            // Add ImageView to CardView
-            mediaCardView.addView(imageView);
-            Log.e(TAG, "added " + imageView.getId());
 
+            // Add ImageView to LinearLayout
+            mediaLinearLayout.addView(imageView);
+            Log.e(TAG, "added " + imageView.getId());
             Glide.with(this)
                     .load(imagePair.first)
                     .into(imageView);
@@ -229,8 +229,8 @@ public class EntryDetailsActivity extends AppCompatActivity {
             videoView.setLayoutParams(layoutParams);
             int videoId = ViewCompat.generateViewId();
             videoView.setId(videoId);
-            // Add VideoView to CardView
-            mediaCardView.addView(videoView);
+            // Add VideoView to LinearLayout
+            mediaLinearLayout.addView(videoView);
             videoView.setVideoURI(Uri.fromFile(videoPair.first)); // if doesn't work, try Uri.parse instead
         }
         titleTextView.setText(entry.getTitle());

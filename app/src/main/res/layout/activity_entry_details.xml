@@ -74,10 +74,14 @@
                 android:layout_height="wrap_content"
                 tools:text="Wed Aug 24 2042" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/entryDetailsMediaCardView"
+            <LinearLayout
+                android:id="@+id/entryDetailsMediaLinearLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical">
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/entryDetailsTextTextView"

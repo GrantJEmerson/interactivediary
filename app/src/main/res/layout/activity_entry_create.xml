@@ -45,18 +45,21 @@
             android:hint="@string/Title"
             android:textSize="34sp"/>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/entryCreateMediaCardView"
+            <LinearLayout
+                android:id="@+id/entryCreateMediaLinearLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <ImageButton
-                android:id="@+id/entryCreateAddMediaButton"
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/add_media"
-                android:src="@android:drawable/ic_menu_gallery"
-                tools:srcCompat="@tools:sample/avatars" />
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/entryCreateAddMediaButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/add_media"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    tools:srcCompat="@tools:sample/avatars" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/entryCreateTextEditText"

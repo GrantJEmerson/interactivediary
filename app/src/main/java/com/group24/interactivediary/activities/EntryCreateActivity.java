@@ -101,7 +101,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
     private RelativeLayout relativeLayout;
     private Toolbar toolbar;
     private EditText titleEditText;
-    private CardView mediaCardView;
+    private LinearLayout mediaLinearLayout;
     private ImageButton addMediaImageButton;
     private EditText textEditText;
     private RadioButton privateRadioButton;
@@ -131,7 +131,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
         relativeLayout = findViewById(R.id.entryCreateRelativeLayout);
         toolbar = findViewById(R.id.toolbar);
         titleEditText = findViewById(R.id.entryCreateTitleEditText);
-        mediaCardView = findViewById(R.id.entryCreateMediaCardView);
+        mediaLinearLayout = findViewById(R.id.entryCreateMediaLinearLayout);
         addMediaImageButton = findViewById(R.id.entryCreateAddMediaButton);
         textEditText = findViewById(R.id.entryCreateTextEditText);
         privateRadioButton = findViewById(R.id.createEntryPrivateRadioButton);
@@ -174,9 +174,10 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 imageView.requestLayout();
                 int imageId = ViewCompat.generateViewId();
                 imageView.setId(imageId);
-                // Add ImageView to CardView
-                mediaCardView.addView(imageView);
 
+                // Add ImageView to LinearLayout
+                mediaLinearLayout.addView(imageView);
+                Log.e(TAG, "added " + imageView.getId());
                 Glide.with(this)
                         .load(imagePair.first)
                         .into(imageView);
@@ -203,8 +204,8 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 videoView.setLayoutParams(layoutParams);
                 int videoId = ViewCompat.generateViewId();
                 videoView.setId(videoId);
-                // Add VideoView to CardView
-                mediaCardView.addView(videoView);
+                // Add VideoView to LinearLayout
+                mediaLinearLayout.addView(videoView);
                 videoView.setVideoURI(Uri.fromFile(videoPair.first)); // if doesn't work, try Uri.parse instead
                 videoView.setOnClickListener(new View.OnClickListener() {
                     @Override
