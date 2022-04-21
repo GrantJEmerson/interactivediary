@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -78,6 +79,7 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
     private EntryManager entryManager;
     private List<Entry> entries;
     private Map<String, Marker> markers;
+    private Entry.Visibility visibility;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {// Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_mapview, container, false);
@@ -93,6 +95,16 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
         // Initialize other member variables
         viewModelProvider = new ViewModelProvider(requireActivity());
         mapviewViewModel = viewModelProvider.get(MapviewViewModel.class);
+
+        // Listen for visibility being changed
+        mapviewViewModel.getVisibility().observe(getViewLifecycleOwner(), new Observer<Entry.Visibility>() {
+            @Override
+            public void onChanged(Entry.Visibility selectedVisibility) {
+                Log.e(TAG, "onChanged called");
+                visibility = selectedVisibility;
+                fetchEntries();
+            }
+        });
 
         markers = new HashMap<>();
         entries = new ArrayList<>();
@@ -273,7 +285,7 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
 
         ParsePolygon polygon = new ParsePolygon(points);
 
-        entryManager.fetchEntries(Entry.Visibility.PUBLIC, Entry.Ordering.DATE_DESCENDING, new Search(Search.SearchType.POLYGON, polygon), null, entriesFound -> {
+        entryManager.fetchEntries(visibility, Entry.Ordering.DATE_DESCENDING, new Search(Search.SearchType.POLYGON, polygon), null, entriesFound -> {
             entries = entriesFound;
             updateEntriesShownOnMap();
         });
@@ -281,7 +293,7 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
 
     private void updateEntriesShownOnMap() {
 
-        Set<String> unseenEntryIds = new HashSet<String>(markers.keySet());
+        Set<String> unseenEntryIds = new HashSet<>(markers.keySet());
 
         for (Entry entry : entries) {
             if (!markers.keySet().contains(entry.getObjectId())) {
