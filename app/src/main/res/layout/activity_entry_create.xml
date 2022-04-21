@@ -52,12 +52,15 @@
                 android:layout_gravity="center_horizontal"
                 android:orientation="vertical">
 
-                <ImageButton
+                <Button
                     android:id="@+id/entryCreateAddMediaButton"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
                     android:contentDescription="@string/add_media"
                     android:src="@android:drawable/ic_menu_gallery"
+                    android:text="@string/add_media"
+                    app:icon="@drawable/ic_baseline_image_24"
                     tools:srcCompat="@tools:sample/avatars" />
             </LinearLayout>
 

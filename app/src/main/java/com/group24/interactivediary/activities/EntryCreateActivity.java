@@ -102,7 +102,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
     private Toolbar toolbar;
     private EditText titleEditText;
     private LinearLayout mediaLinearLayout;
-    private ImageButton addMediaImageButton;
+    private Button addMediaImageButton;
     private EditText textEditText;
     private RadioButton privateRadioButton;
     private RadioButton sharedRadioButton;
@@ -121,6 +121,8 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
     private File mediaFile;
     private List<ParseFile> mediaItems;
     private List<String> mediaItemDescriptions;
+    private List<Integer> imageViewIds;
+    private List<Integer> videoViewIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +148,8 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
         context = this;
         mediaItems = new ArrayList<>();
         mediaItemDescriptions = new ArrayList<>();
+        imageViewIds = new ArrayList<>();
+        videoViewIds = new ArrayList<>();
 
         // Set up toolbar
         toolbar.setTitleTextColor(getResources().getColor(R.color.white, getTheme()));
@@ -164,60 +168,13 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
             for (Object imagePairObject : mediaItemsLists.get(0)) {
                 Pair<Bitmap, String> imagePair = (Pair<Bitmap, String>) imagePairObject;
 
-                // Make new ImageView and set layout params
-                ImageView imageView = new ImageView(this);
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                layoutParams.setMargins(10, 10, 10, 10);
-                imageView.setLayoutParams(layoutParams);
-                imageView.getLayoutParams().height = 1000;
-                imageView.getLayoutParams().width = 1000;
-                imageView.requestLayout();
-                int imageId = ViewCompat.generateViewId();
-                imageView.setId(imageId);
-
-                // Add ImageView to LinearLayout
-                mediaLinearLayout.addView(imageView);
-                Log.e(TAG, "added " + imageView.getId());
-                Glide.with(this)
-                        .load(imagePair.first)
-                        .into(imageView);
-                imageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // Add media item description on click
-                        TextView mediaItemDescription = new TextView(context);
-                        mediaItemDescription.setText(imagePair.second);
-                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        layoutParams.addRule(RelativeLayout.BELOW, imageId);
-                        mediaItemDescription.setLayoutParams(layoutParams);
-                    }
-                });
+                imageViewIds.add(addImageView(context, imagePair.first, imagePair.second));
             }
             // Videos
             for (Object videoPairObject : mediaItemsLists.get(1)) {
                 Pair<File, String> videoPair = (Pair<File, String>) videoPairObject;
 
-                // Make new VideoView and set layout params
-                VideoView videoView = new VideoView(this);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                layoutParams.setMargins(10, 10, 10, 10);
-                videoView.setLayoutParams(layoutParams);
-                int videoId = ViewCompat.generateViewId();
-                videoView.setId(videoId);
-                // Add VideoView to LinearLayout
-                mediaLinearLayout.addView(videoView);
-                videoView.setVideoURI(Uri.fromFile(videoPair.first)); // if doesn't work, try Uri.parse instead
-                videoView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // Add media item description on click
-                        TextView mediaItemDescription = new TextView(context);
-                        mediaItemDescription.setText(videoPair.second);
-                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        layoutParams.addRule(RelativeLayout.BELOW, videoId);
-                        mediaItemDescription.setLayoutParams(layoutParams);
-                    }
-                });
+                videoViewIds.add(addVideoView(context, videoPair.first, videoPair.second));
             }
             titleEditText.setText(entry.getTitle());
             textEditText.setText(entry.getText());
@@ -597,6 +554,9 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 mediaCheckDialog.show();
 
                 ImageView imageView = mediaCheckDialog.findViewById(R.id.checkMediaDialogImageView);
+                imageView.setVisibility(View.VISIBLE);
+                VideoView videoView = mediaCheckDialog.findViewById(R.id.checkMediaDialogVideoView);
+                videoView.setVisibility(View.GONE);
                 EditText editText = mediaCheckDialog.findViewById(R.id.checkMediaDialogEditText);
                 Button sendButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogSendButton);
                 Button nevermindButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogNevermindButton);
@@ -627,11 +587,13 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                             // Load the resized image into the ImageView
                             ParseFile parseFile = new ParseFile(resizedFile);
                             mediaItems.add(parseFile);
+                            imageViewIds.add(addImageView(context, resizedBitmap, mediaDescription));
                         } catch (IOException e) {
                             Log.e(TAG, "Failed to save resized bitmap to disk", e);
                             // Load the original taken image into the ImageView
                             ParseFile parseFile = new ParseFile(getPhotoFileUri(mediaFileName));
                             mediaItems.add(parseFile);
+                            imageViewIds.add(addImageView(context, rawTakenImage, mediaDescription));
                         }
                         mediaItemDescriptions.add(mediaDescription);
                         mediaFileName = "interactiveDiary" + System.currentTimeMillis() + ".png";
@@ -657,6 +619,9 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 mediaCheckDialog.show();
 
                 ImageView imageView = mediaCheckDialog.findViewById(R.id.checkMediaDialogImageView);
+                imageView.setVisibility(View.VISIBLE);
+                VideoView videoView = mediaCheckDialog.findViewById(R.id.checkMediaDialogVideoView);
+                videoView.setVisibility(View.GONE);
                 EditText editText = mediaCheckDialog.findViewById(R.id.checkMediaDialogEditText);
                 Button sendButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogSendButton);
                 Button nevermindButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogNevermindButton);
@@ -686,11 +651,13 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                             // Load the resized image into the ImageView
                             ParseFile parseFile = new ParseFile(resizedFile);
                             mediaItems.add(parseFile);
+                            imageViewIds.add(addImageView(context, resizedBitmap, mediaDescription));
                         } catch (IOException e) {
                             Log.e(TAG, "Failed to save resized bitmap to disk", e);
                             // Load the original taken image into the ImageView
                             ParseFile parseFile = new ParseFile(getPhotoFileUri(mediaFileName));
                             mediaItems.add(parseFile);
+                            imageViewIds.add(addImageView(context, rawChosenImage, mediaDescription));
                         }
                         mediaItemDescriptions.add(mediaDescription);
                         mediaFileName = "interactiveDiary" + System.currentTimeMillis() + ".png";
@@ -805,5 +772,149 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
 
+    }
+
+    private int addImageView(Context context, Bitmap image, String mediaDescription) {
+        // Make new ImageView and set layout params
+        ImageView imageView = new ImageView(context);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(10, 10, 10, 10);
+        imageView.setLayoutParams(layoutParams);
+        imageView.getLayoutParams().height = 1000;
+        imageView.getLayoutParams().width = 1000;
+        imageView.requestLayout();
+        int imageId = ViewCompat.generateViewId();
+        imageView.setId(imageId);
+
+        // Add ImageView to LinearLayout
+        mediaLinearLayout.addView(imageView);
+        Log.e(TAG, "added " + imageView.getId());
+        Glide.with(context)
+                .load(image)
+                .into(imageView);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Dialog mediaCheckDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
+                mediaCheckDialog.getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.white)));
+                mediaCheckDialog.setContentView(R.layout.media_check_dialog);
+                mediaCheckDialog.setCancelable(true);
+                mediaCheckDialog.show();
+
+                ImageView dialogImageView = mediaCheckDialog.findViewById(R.id.checkMediaDialogImageView);
+                dialogImageView.setVisibility(View.VISIBLE);
+                VideoView dialogVideoView = mediaCheckDialog.findViewById(R.id.checkMediaDialogVideoView);
+                dialogVideoView.setVisibility(View.GONE);
+                EditText dialogEditText = mediaCheckDialog.findViewById(R.id.checkMediaDialogEditText);
+                Button dialogSendButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogSendButton);
+                Button dialogNevermindButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogNevermindButton);
+
+                dialogImageView.setImageBitmap(image);
+                dialogEditText.setText(mediaDescription);
+                dialogSendButton.setText(getResources().getString(R.string.update_media));
+                dialogNevermindButton.setText(getResources().getString(R.string.delete_media));
+
+                dialogSendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String newDescription = dialogEditText.getText().toString();
+                        // Find what number view this is
+                        int index;
+                        for (index = 0; index < imageViewIds.size(); index++) {
+                            if (imageViewIds.get(index) == imageId) break;
+                        }
+                        mediaItemDescriptions.set(index, newDescription);
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+
+                dialogNevermindButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Find what number view this is
+                        int index;
+                        for (index = 0; index < imageViewIds.size(); index++) {
+                            if (imageViewIds.get(index) == imageId) break;
+                        }
+                        // Remove from all lists
+                        imageViewIds.remove(index);
+                        mediaItems.remove(index);
+                        mediaItemDescriptions.remove(index);
+
+                        mediaLinearLayout.removeView(imageView);
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+            }
+        });
+        return imageId;
+    }
+
+    private int addVideoView(Context context, File video, String mediaDescription) {
+        // Make new VideoView and set layout params
+        VideoView videoView = new VideoView(context);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(10, 10, 10, 10);
+        videoView.setLayoutParams(layoutParams);
+        int videoId = ViewCompat.generateViewId();
+        videoView.setId(videoId);
+        // Add VideoView to LinearLayout
+        mediaLinearLayout.addView(videoView);
+        videoView.setVideoURI(Uri.fromFile(video)); // if doesn't work, try Uri.parse instead
+        videoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Dialog mediaCheckDialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
+                mediaCheckDialog.getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.white)));
+                mediaCheckDialog.setContentView(R.layout.media_check_dialog);
+                mediaCheckDialog.setCancelable(true);
+                mediaCheckDialog.show();
+
+                ImageView dialogImageView = mediaCheckDialog.findViewById(R.id.checkMediaDialogImageView);
+                dialogImageView.setVisibility(View.GONE);
+                VideoView dialogVideoView = mediaCheckDialog.findViewById(R.id.checkMediaDialogVideoView);
+                dialogVideoView.setVisibility(View.VISIBLE);
+                EditText dialogEditText = mediaCheckDialog.findViewById(R.id.checkMediaDialogEditText);
+                Button dialogSendButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogSendButton);
+                Button dialogNevermindButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogNevermindButton);
+
+                dialogEditText.setText(mediaDescription);
+                dialogSendButton.setText(getResources().getString(R.string.update_media));
+                dialogNevermindButton.setText(getResources().getString(R.string.delete_media));
+
+                dialogSendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String newDescription = dialogEditText.getText().toString();
+                        // Find what number view this is
+                        int index;
+                        for (index = 0; index < videoViewIds.size(); index++) {
+                            if (videoViewIds.get(index) == videoId) break;
+                        }
+                        mediaItemDescriptions.set(index, newDescription);
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+
+                dialogNevermindButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Find what number view this is
+                        int index;
+                        for (index = 0; index < imageViewIds.size(); index++) {
+                            if (imageViewIds.get(index) == videoId) break;
+                        }
+                        // Remove from all lists
+                        imageViewIds.remove(index);
+                        mediaItems.remove(index);
+                        mediaItemDescriptions.remove(index);
+
+                        mediaLinearLayout.removeView(videoView);
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+            }
+        });
+        return videoId;
     }
 }

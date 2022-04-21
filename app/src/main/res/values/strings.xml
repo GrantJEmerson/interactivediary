@@ -76,4 +76,6 @@
     <string name="add_media_description">Add an optional media description here.</string>
     <string name="send_it">Send it!</string>
     <string name="nevermind">Never mind...</string>
+    <string name="delete_media">Delete media from entry</string>
+    <string name="update_media">Update media</string>
 </resources>

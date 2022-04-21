@@ -121,6 +121,10 @@ public class Entry extends ParseObject implements Parcelable {
         return getString(KEY_TEXT);
     }
 
+    public List<ParseFile> getMediaItemsAsParseFiles() {
+        return getList(KEY_MEDIA_ITEMS);
+    }
+
     public List<List> getMediaItems() {
         List<ParseFile> mediaItemPFiles = getList(KEY_MEDIA_ITEMS);
         List<Pair<Bitmap, String>> images = new ArrayList<>();
