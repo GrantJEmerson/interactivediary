@@ -59,9 +59,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
-public class MapviewFragment extends Fragment implements LocationListener, GoogleMap.OnCameraIdleListener, GoogleMap.OnMarkerClickListener {
+public class MapviewFragment extends Fragment implements LocationListener, GoogleMap.OnCameraIdleListener, GoogleMap.OnInfoWindowClickListener {
     public static final String TAG = "MapviewFragment";
 
     public static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 368643; // just an arbitrary number
@@ -138,9 +139,10 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
+    public void onInfoWindowClick(Marker marker) {
         for (Entry entry : entries) {
-            if (markers.containsKey(entry.getObjectId()) && markers.get(entry.getObjectId()).equals(marker)) {
+            if (markers.containsKey(entry.getObjectId()) && Objects.equals(markers.get(entry.getObjectId()), marker)) {
+
                 Context context = requireContext();
 
                 Intent intent = new Intent(context, EntryDetailsActivity.class);
@@ -151,7 +153,6 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
                 context.startActivity(intent);
             }
         }
-        return false;
     }
 
     protected void setUpMapIfNeeded() {
@@ -180,7 +181,7 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
         if (googleMap != null) {
             map = googleMap;
             map.setOnCameraIdleListener(this);
-            map.setOnMarkerClickListener(this);
+            map.setOnInfoWindowClickListener(this);
             displayLocation();
         }
         else {
