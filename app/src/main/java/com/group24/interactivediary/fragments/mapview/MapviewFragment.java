@@ -195,7 +195,7 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
         if (location != null && map != null) {
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             map.setMyLocationEnabled(true);
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
             map.animateCamera(cameraUpdate);
             fetchEntries();
         }
