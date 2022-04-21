@@ -1,15 +1,10 @@
 package com.group24.interactivediary.networking;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
-
-import com.google.android.gms.maps.model.Polygon;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.models.GeneralDate;
 import com.group24.interactivediary.models.Search;
@@ -17,7 +12,6 @@ import com.parse.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -26,10 +20,11 @@ public class EntryManager {
     public static final String TAG = "EntryManager";
 
     Context context;
-    LocationManager locationManager;
+    LocationService locationService;
 
-    public EntryManager(Context context) {
+    public EntryManager(Context context, LocationService locationService) {
         this.context = context;
+        this.locationService = locationService;
     }
 
     public void deleteUsersEntries(final FetchCallback<Boolean> callback) {
@@ -129,16 +124,12 @@ public class EntryManager {
                 break;
             case NEAREST:
                 Log.e(TAG, "query sorted by nearest");
-                Location userCurrentLocation = getCurrentUserLocation();
+                if (locationService == null) break;
+                ParseGeoPoint userCurrentLocation = locationService.getCurrentLocation();
                 if (userCurrentLocation != null) {
-                    ParseGeoPoint geoPoint = new ParseGeoPoint();
-                    geoPoint.setLatitude(userCurrentLocation.getLatitude());
-                    geoPoint.setLongitude(userCurrentLocation.getLongitude());
-
-                    entryQuery.whereNear(Entry.KEY_LOCATION, geoPoint);
-
-                    break;
+                    entryQuery.whereNear(Entry.KEY_LOCATION, userCurrentLocation);
                 }
+                break;
             default:
                 Log.e(TAG, "query sorted by date descending");
                 entryQuery.addDescendingOrder(Entry.KEY_UPDATED_AT);
@@ -198,15 +189,5 @@ public class EntryManager {
                 Log.e(TAG, "Error fetching entries: " + e.getLocalizedMessage());
             }
         });
-    }
-
-    private Location getCurrentUserLocation() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (locationManager == null) {
-                locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-                return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            }
-        }
-        return null;
     }
 }

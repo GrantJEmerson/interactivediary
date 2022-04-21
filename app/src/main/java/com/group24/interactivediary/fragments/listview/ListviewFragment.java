@@ -1,5 +1,9 @@
 package com.group24.interactivediary.fragments.listview;
 
+import static com.group24.interactivediary.fragments.mapview.MapviewFragment.ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -13,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +37,7 @@ import com.group24.interactivediary.models.GeneralDate;
 import com.group24.interactivediary.models.Search;
 import com.group24.interactivediary.networking.EntryManager;
 import com.group24.interactivediary.networking.FetchCallback;
+import com.group24.interactivediary.networking.LocationService;
 import com.parse.ParseACL;
 
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +72,7 @@ public class ListviewFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
     private EntryManager entryManager;
+    private LocationService locationService;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {// Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_listview, container, false);
@@ -93,7 +100,8 @@ public class ListviewFragment extends Fragment {
         entries = new ArrayList<>();
         entryAdapter = new EntryAdapter(requireActivity(), entries);
         linearLayoutManager = new LinearLayoutManager(requireActivity());
-        entryManager = new EntryManager(requireActivity());
+        locationService = new LocationService(requireActivity());
+        entryManager = new EntryManager(requireActivity(), locationService);
 
         // Set up nothingHereYet TextView
         listviewViewModel.getNothingHereYetText().observe(getViewLifecycleOwner(), nothingHereYet::setText);
@@ -287,6 +295,30 @@ public class ListviewFragment extends Fragment {
     public void onResume() {
         populateHomeTimeline();
         super.onResume();
+    }
+
+    // Callback with the request from calling requestPermissions(...)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        // Make sure it's our original ACCESS_FINE_LOCATION request
+        if (requestCode == ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST) {
+            // Permission has been granted
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(requireActivity(), getResources().getText(R.string.location_permissions_granted), Toast.LENGTH_SHORT).show();
+                locationService.setUpLocationManager();
+            } else {
+                // showRationale = false if user clicks Never Ask Again, otherwise true
+                boolean showRationale = shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION);
+
+                if (showRationale) {
+//                    weNeedLocationPermissions.setVisibility(View.VISIBLE);
+                }
+                else {
+//                    weNeedLocationPermissions.setVisibility(View.GONE);
+                    Toast.makeText(requireActivity(), getResources().getText(R.string.location_permissions_denied), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     private void populateHomeTimeline() {

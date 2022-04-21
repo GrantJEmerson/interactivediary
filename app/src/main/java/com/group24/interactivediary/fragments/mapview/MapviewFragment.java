@@ -110,7 +110,7 @@ public class MapviewFragment extends Fragment implements LocationListener, Googl
         markers = new HashMap<>();
         entries = new ArrayList<>();
 
-        entryManager = new EntryManager(requireActivity());
+        entryManager = new EntryManager(requireActivity(), null);
 
         setUpMapIfNeeded();
         getPermissionToAccessFineLocation();

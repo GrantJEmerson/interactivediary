@@ -174,7 +174,7 @@ public class ProfileActivity extends AppCompatActivity {
         deleteAccountProgressDialog.setCancelable(false);
         deleteAccountProgressDialog.show();
 
-        EntryManager entryManager = new EntryManager(this);
+        EntryManager entryManager = new EntryManager(this, null);
         entryManager.deleteUsersEntries(success -> {
             if (success) {
                 ParseUser.getCurrentUser().deleteInBackground(exception -> {
