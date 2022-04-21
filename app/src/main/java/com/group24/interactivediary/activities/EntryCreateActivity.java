@@ -364,7 +364,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 entry.setVisibility(visibility);
                 entry.setUpdatedAtDay(currentDate.getDate());
                 entry.setUpdatedAtMonth(currentDate.getMonth());
-                if (geoPointLocation != null) entry.setLocation(geoPointLocation);
+                if (geoPointLocation != null && locationSwitch.isChecked()) entry.setLocation(geoPointLocation);
                 Log.e(TAG, "Saving new entry...");
                 entry.saveInBackground(new SaveCallback() {
                     @Override
