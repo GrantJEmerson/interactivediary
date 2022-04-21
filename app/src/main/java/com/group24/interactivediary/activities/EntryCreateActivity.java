@@ -171,6 +171,7 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
                 imageView.setLayoutParams(layoutParams);
                 imageView.getLayoutParams().height = 1000;
                 imageView.getLayoutParams().width = 1000;
+                imageView.requestLayout();
                 int imageId = ViewCompat.generateViewId();
                 imageView.setId(imageId);
                 // Add ImageView to CardView

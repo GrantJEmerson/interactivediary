@@ -207,6 +207,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
             imageView.setLayoutParams(layoutParams);
             imageView.getLayoutParams().height = 1000;
             imageView.getLayoutParams().width = 1000;
+            imageView.requestLayout();
             int imageId = ViewCompat.generateViewId();
             imageView.setId(imageId);
             // Add ImageView to CardView
