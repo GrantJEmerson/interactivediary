@@ -17,6 +17,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 
@@ -191,7 +192,7 @@ public class HomeActivity extends AppCompatActivity {
         };
 
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(ConnectivityManager.class);
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        if (Settings.System.canWrite(this)) connectivityManager.requestNetwork(networkRequest, networkCallback);
     }
 
     @Override
@@ -386,7 +387,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void ifNoLocationPermission() {
-        // TODO: toast saying we need location permissions to order by location
-        // set whatever menu to previous state (if ordering menu set to "nearest", set to whatever it was before
+        // set menu to previous state (if ordering menu set to "nearest", set to whatever it was before
     }
 }

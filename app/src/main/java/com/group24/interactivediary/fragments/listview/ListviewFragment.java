@@ -121,8 +121,6 @@ public class ListviewFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // TODO: figure out how to adapt string query into Date (in case of Date search) or Location (in case of Location search)
-
                 Object searchParameter;
 
                 switch (searchType) {
@@ -232,7 +230,6 @@ public class ListviewFragment extends Fragment {
                         break;
                     case 4:
                         sortType = Entry.Ordering.NEAREST;
-                        // TODO: request location?
                         break;
                     default:
                         sortType = Entry.Ordering.DATE_DESCENDING;

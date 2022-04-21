@@ -47,7 +47,7 @@
         <activity
             android:name=".activities.LoginSignupActivity"
             android:exported="true"
-            android:label="@string/title_activity_login_signup"
+            android:label="@string/app_name"
             android:theme="@style/Theme.InteractiveDiary.NoActionBar"
             android:foregroundServiceType="location" >
             <intent-filter>
