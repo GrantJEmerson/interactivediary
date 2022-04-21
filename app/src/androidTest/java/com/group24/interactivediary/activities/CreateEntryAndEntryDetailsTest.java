@@ -185,7 +185,7 @@ public class CreateEntryAndEntryDetailsTest {
         textView5.check(matches(withText("Entry Details")));
 
         ViewInteraction button = onView(
-                allOf(withId(R.id.entryDetailsEditButton), withText("Edit entry"), isDisplayed()));
+                allOf(withId(R.id.entryDetailsSettingsButton), withText("Edit entry"), isDisplayed()));
         button.check(matches(isDisplayed()));
     }
 

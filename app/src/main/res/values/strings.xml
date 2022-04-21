@@ -78,4 +78,8 @@
     <string name="nevermind">Never mind...</string>
     <string name="delete_media">Delete media from entry</string>
     <string name="update_media">Update media</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="confirm_entry_deletion_title">Delete Entry</string>
+    <string name="confirm_entry_deletion_message">Are you sure you want to delete this entry?</string>
 </resources>

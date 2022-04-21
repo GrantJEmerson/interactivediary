@@ -51,13 +51,13 @@
                     tools:text="Day at the Beach" />
 
                 <Button
-                    android:id="@+id/entryDetailsEditButton"
+                    android:id="@+id/entryDetailsSettingsButton"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|center_vertical"
-                    android:layout_weight="3"
-                    android:text="@string/edit_entry"
+                    android:layout_weight="6"
                     android:visibility="gone"
+                    app:icon="@drawable/ic_baseline_settings_24"
                     tools:visibility="visible" />
 
             </LinearLayout>

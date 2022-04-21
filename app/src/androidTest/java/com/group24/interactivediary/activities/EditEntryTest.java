@@ -190,7 +190,7 @@ public class EditEntryTest {
         }
 
         ViewInteraction materialButton4 = onView(
-                allOf(withId(R.id.entryDetailsEditButton), withText("Edit entry"),
+                allOf(withId(R.id.entryDetailsSettingsButton), withText("Edit entry"),
                         childAtPosition(
                                 withClassName(is("android.widget.LinearLayout")),
                                 1),

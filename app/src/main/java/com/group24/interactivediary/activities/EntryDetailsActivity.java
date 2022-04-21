@@ -2,22 +2,26 @@ package com.group24.interactivediary.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.core.view.ViewCompat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,6 +33,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.R;
+import com.parse.DeleteCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 
@@ -48,7 +53,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
     private TextView timestampTextView;
     private LinearLayout mediaLinearLayout;
     private TextView textTextView;
-    private Button editButton;
+    private Button settingsButton;
 
     // Other necessary member variables
     private Entry entry;
@@ -67,7 +72,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
         timestampTextView = findViewById(R.id.entryDetailsTimestampTextView);
         mediaLinearLayout = findViewById(R.id.entryDetailsMediaLinearLayout);
         textTextView = findViewById(R.id.entryDetailsTextTextView);
-        editButton = findViewById(R.id.entryDetailsEditButton);
+        settingsButton = findViewById(R.id.entryDetailsSettingsButton);
 
         // Initialize other member variables
         context = this;
@@ -81,21 +86,23 @@ public class EntryDetailsActivity extends AppCompatActivity {
         // Unwrap the entry that was passed in by the intent
         entry = (Entry) Parcels.unwrap(getIntent().getParcelableExtra(Entry.class.getSimpleName()));
 
-        // Show edit button if private or shared, hide if public (unless current user is the author)
+        // Show settings button if private or shared, hide if public (unless current user is the author)
         if (entry.getVisibility() == Entry.Visibility.PRIVATE || entry.getVisibility() == Entry.Visibility.SHARED) {
-            editButton.setVisibility(View.VISIBLE);
+            settingsButton.setVisibility(View.VISIBLE);
         }
         else {
-            if (entry.getAuthor().getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) editButton.setVisibility(View.VISIBLE);
-            else editButton.setVisibility(View.GONE);
+            if (entry.getAuthor().getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) settingsButton.setVisibility(View.VISIBLE);
+            else settingsButton.setVisibility(View.GONE);
         }
 
         bindEntryToLayout();
 
-        editButton.setOnClickListener(new View.OnClickListener() {
+        settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                goEntryCreateActivity();
+                registerForContextMenu(settingsButton);
+                openContextMenu(view);
+                unregisterForContextMenu(settingsButton);
             }
         });
     }
@@ -133,6 +140,42 @@ public class EntryDetailsActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.entry_settings_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.editMenuItem:
+                goEntryCreateActivity();
+                return true;
+            case R.id.deleteMenuItem:
+                AlertDialog.Builder confirmEntryDeletionDialog = new AlertDialog.Builder(this)
+                        .setTitle(getResources().getString(R.string.confirm_entry_deletion_title))
+                        .setMessage(getResources().getString(R.string.confirm_entry_deletion_message))
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteEntry();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null);
+
+                confirmEntryDeletionDialog.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -256,5 +299,16 @@ public class EntryDetailsActivity extends AppCompatActivity {
             }
             authorTextView.setText(entry.getAuthor().getUsername() + ", " + contributorsString);
         }
+    }
+
+    private void deleteEntry() {
+        entry.deleteInBackground(new DeleteCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Error fetching entries: " + e.getLocalizedMessage());
+                }
+            }
+        });
     }
 }
