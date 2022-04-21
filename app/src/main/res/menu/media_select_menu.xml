@@ -7,12 +7,12 @@
         android:id="@+id/cameraMenuItem"
         android:icon="@drawable/ic_baseline_camera_alt_24"
         android:title="@string/capture_media_with_camera"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/galleryMenuItem"
         android:icon="@drawable/ic_baseline_image_24"
         android:title="@string/upload_media_from_gallery"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
 
 </menu>

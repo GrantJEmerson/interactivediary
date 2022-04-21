@@ -103,8 +103,6 @@ public class HomeActivity extends AppCompatActivity {
         // Set up toolbar
         toolbar.setTitleTextColor(getResources().getColor(R.color.white, getTheme()));
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         // Display listviewFragment by default
         displayListviewFragment();
@@ -130,25 +128,21 @@ public class HomeActivity extends AppCompatActivity {
                 Log.e(TAG, selectedVisibility+"");
                 switch (selectedVisibility) {
                     case PRIVATE:
-                        Log.e(TAG, "PRIVATE AAAAAAAAAAAAAA");
                         privateButton.setBackgroundColor(getResources().getColor(R.color.gold));
                         sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         break;
                     case SHARED:
-                        Log.e(TAG, "SHARED AAAAAAAAAAAAAA");
                         privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         sharedButton.setBackgroundColor(getResources().getColor(R.color.gold));
                         publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         break;
                     case PUBLIC:
-                        Log.e(TAG, "PUBLIC AAAAAAAAAAAAAA");
                         privateButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         publicButton.setBackgroundColor(getResources().getColor(R.color.gold));
                         break;
                     default:
-                        Log.e(TAG, "DEFAULT AAAAAAAAAAAAAA");
                         privateButton.setBackgroundColor(getResources().getColor(R.color.gold));
                         sharedButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
                         publicButton.setBackgroundColor(getResources().getColor(R.color.mid_teal));
