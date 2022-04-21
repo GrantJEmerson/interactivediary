@@ -1,31 +1,44 @@
 package com.group24.interactivediary.activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
-import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
+import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -40,7 +53,8 @@ import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.snackbar.Snackbar;
-import com.group24.interactivediary.fragments.listview.ListviewViewModel;
+import com.group24.interactivediary.BitmapScaler;
+import com.group24.interactivediary.BuildConfig;
 import com.group24.interactivediary.models.DiaryUser;
 import com.group24.interactivediary.models.Entry;
 import com.group24.interactivediary.R;
@@ -55,10 +69,15 @@ import net.cachapa.expandablelayout.ExpandableLayout;
 
 import org.parceler.Parcels;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class EntryCreateActivity extends AppCompatActivity {
     public static final String TAG = "EntryCreateActivity";
@@ -66,6 +85,12 @@ public class EntryCreateActivity extends AppCompatActivity {
     public static final int CREATE_ACTIVITY = 5732787; // just an arbitrary number
     public static final int EDIT_ACTIVITY = 7643278; // just an arbitrary number
     public static final String ENTRY_RESULT_TAG = "entryFromEntryCreateActivity";
+
+    public final static int CAMERA_CODE = 3434536;  // just an arbitrary number
+    public final static int GALLERY_CODE = 9878754;  // just an arbitrary number
+    public String mediaFileName = "interactiveDiary" + System.currentTimeMillis() + ".png";
+
+    public final static int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 5354657;  // just an arbitrary number
 
     public static final int ACCESS_FINE_LOCATION_PERMISSIONS_REQUEST = 368643; // just an arbitrary number
 
@@ -90,6 +115,9 @@ public class EntryCreateActivity extends AppCompatActivity {
     private Location location;
     private ParseGeoPoint geoPointLocation;
     private Context context;
+    private File mediaFile;
+    private List<ParseFile> mediaItems;
+    private List<String> mediaItemDescriptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +141,8 @@ public class EntryCreateActivity extends AppCompatActivity {
 
         // Initialize other member variables
         context = this;
+        mediaItems = new ArrayList<>();
+        mediaItemDescriptions = new ArrayList<>();
 
         // Set up toolbar
         toolbar.setTitleTextColor(getResources().getColor(R.color.white, getTheme()));
@@ -136,6 +166,8 @@ public class EntryCreateActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 layoutParams.setMargins(10, 10, 10, 10);
                 imageView.setLayoutParams(layoutParams);
+                imageView.getLayoutParams().height = 1000;
+                imageView.getLayoutParams().width = 1000;
                 int imageId = ViewCompat.generateViewId();
                 imageView.setId(imageId);
                 // Add ImageView to CardView
@@ -236,6 +268,7 @@ public class EntryCreateActivity extends AppCompatActivity {
             }
         });
 
+        // Set up location switch
         locationSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -244,6 +277,35 @@ public class EntryCreateActivity extends AppCompatActivity {
             }
         });
 
+        // Set up add media button
+        addMediaImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder cameraOrGalleryDialog = new AlertDialog.Builder(context)
+                        .setTitle(getResources().getString(R.string.capture_media_with_camera))
+                        .setMessage(getResources().getString(R.string.upload_media_from_gallery))
+                        .setIcon(R.drawable.ic_baseline_image_24)
+                        .setPositiveButton(R.string.capture_media_with_camera, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                hideSoftKeyboard(relativeLayout);
+                                launchCamera();
+                            }
+                        })
+                        .setNegativeButton(R.string.upload_media_from_gallery, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                hideSoftKeyboard(relativeLayout);
+                                getPermissionToReadExternalStorage(context);
+                                pickMedia();
+                            }
+                        });
+
+                cameraOrGalleryDialog.show();
+            }
+        });
+
+        // Set up post button
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -252,10 +314,6 @@ public class EntryCreateActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.title_is_empty), Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                // TODO: handle media
-                List<ParseFile> mediaItems = new ArrayList<>();
-                List<String> mediaItemDescriptions = new ArrayList<>();
 
                 String text = textEditText.getText().toString();
                 if (text.isEmpty()) {
@@ -296,6 +354,7 @@ public class EntryCreateActivity extends AppCompatActivity {
                 entry.setContributors(contributors);
                 entry.setText(text);
                 entry.setMediaItems(mediaItems);
+                Log.e(TAG, Arrays.toString(mediaItems.toArray()));
                 entry.setMediaItemDescriptions(mediaItemDescriptions);
                 entry.setVisibility(visibility);
                 entry.setUpdatedAtDay(currentDate.getDate());
@@ -449,10 +508,261 @@ public class EntryCreateActivity extends AppCompatActivity {
     private Location getCurrentUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (locationManager == null) {
-                locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                 return locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             }
         }
         return null;
+    }
+
+    // Trigger camera starting to take photo
+    private void launchCamera() {
+        Log.i(TAG, "launchCamera() called");
+
+        // create Intent to take a picture and return control to the calling application
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Create a File reference for future access
+        mediaFile = getPhotoFileUri(mediaFileName);
+
+        // wrap File object into a content provider
+        Uri fileProvider = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+                BuildConfig.APPLICATION_ID + ".provider", mediaFile);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
+
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Start the image capture intent to take photo
+            startActivityForResult(intent, CAMERA_CODE);
+        } else {
+            Log.e(TAG, "No app can handle this intent");
+            Toast.makeText(this, getResources().getString(R.string.no_camera), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Trigger gallery selection for a photo
+    public void pickMedia() {
+        Log.i(TAG, "pickPhoto() called");
+
+        // Create intent for picking a photo from the gallery
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            // Bring up gallery to select a photo
+            startActivityForResult(intent, GALLERY_CODE);
+        } else {
+            Log.e(TAG, "No app can handle this intent");
+            Toast.makeText(this, getResources().getString(R.string.no_gallery), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_CODE) { // If a photo was taken from the camera
+            if (resultCode == Activity.RESULT_OK) { // Result succeeded
+                Dialog mediaCheckDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar);
+                mediaCheckDialog.getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.white)));
+                mediaCheckDialog.setContentView(R.layout.media_check_dialog);
+                mediaCheckDialog.setCancelable(true);
+                mediaCheckDialog.show();
+
+                ImageView imageView = mediaCheckDialog.findViewById(R.id.checkMediaDialogImageView);
+                EditText editText = mediaCheckDialog.findViewById(R.id.checkMediaDialogEditText);
+                Button sendButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogSendButton);
+                Button nevermindButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogNevermindButton);
+
+                Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(mediaFileName));
+                //Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+                Bitmap rawTakenImage = rotateBitmapOrientation(takenPhotoUri.getPath());
+                imageView.setImageBitmap(rawTakenImage);
+
+                sendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String mediaDescription = editText.getText().toString();
+                        try { // Try to resize the image and save it to the disk
+                            // Resize bitmap
+                            Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, 1000);
+                            // Configure byte output stream
+                            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                            // Compress the image further
+                            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+                            // Create a new file for the resized bitmap
+                            File resizedFile = getPhotoFileUri(mediaFileName);
+                            resizedFile.createNewFile();
+                            FileOutputStream fos = new FileOutputStream(resizedFile);
+                            // Write the bytes of the bitmap to file
+                            fos.write(bytes.toByteArray());
+                            fos.close();
+                            // Load the resized image into the ImageView
+                            ParseFile parseFile = new ParseFile(resizedFile);
+                            mediaItems.add(parseFile);
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to save resized bitmap to disk", e);
+                            // Load the original taken image into the ImageView
+                            ParseFile parseFile = new ParseFile(getPhotoFileUri(mediaFileName));
+                            mediaItems.add(parseFile);
+                        }
+                        mediaItemDescriptions.add(mediaDescription);
+                        mediaFileName = "interactiveDiary" + System.currentTimeMillis() + ".png";
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+
+                nevermindButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+            } else { // Result failed
+                Toast.makeText(this, getResources().getString(R.string.error_camera_media), Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == GALLERY_CODE) { // If a photo was chosen from the gallery
+            if (resultCode == Activity.RESULT_OK) { // Result succeeded
+                Dialog mediaCheckDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar);
+                mediaCheckDialog.getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.white)));
+                mediaCheckDialog.setContentView(R.layout.media_check_dialog);
+                mediaCheckDialog.setCancelable(true);
+                mediaCheckDialog.show();
+
+                ImageView imageView = mediaCheckDialog.findViewById(R.id.checkMediaDialogImageView);
+                EditText editText = mediaCheckDialog.findViewById(R.id.checkMediaDialogEditText);
+                Button sendButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogSendButton);
+                Button nevermindButton = mediaCheckDialog.findViewById(R.id.checkMediaDialogNevermindButton);
+
+                Uri chosenPhotoUri = data.getData();
+                Bitmap rawChosenImage = loadFromUri(chosenPhotoUri);
+                imageView.setImageBitmap(rawChosenImage);
+
+                sendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String mediaDescription = editText.getText().toString();
+                        try { // Try to resize the image and save it to the disk
+                            // Resize bitmap
+                            Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawChosenImage, 1000);
+                            // Configure byte output stream
+                            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                            // Compress the image further
+                            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+                            // Create a new file for the resized bitmap
+                            File resizedFile = getPhotoFileUri(mediaFileName);
+                            resizedFile.createNewFile();
+                            FileOutputStream fos = new FileOutputStream(resizedFile);
+                            // Write the bytes of the bitmap to file
+                            fos.write(bytes.toByteArray());
+                            fos.close();
+                            // Load the resized image into the ImageView
+                            ParseFile parseFile = new ParseFile(resizedFile);
+                            mediaItems.add(parseFile);
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to save resized bitmap to disk", e);
+                            // Load the original taken image into the ImageView
+                            ParseFile parseFile = new ParseFile(getPhotoFileUri(mediaFileName));
+                            mediaItems.add(parseFile);
+                        }
+                        mediaItemDescriptions.add(mediaDescription);
+                        mediaFileName = "interactiveDiary" + System.currentTimeMillis() + ".png";
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+
+                nevermindButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mediaCheckDialog.dismiss();
+                    }
+                });
+            } else { // Result failed
+                Toast.makeText(this, getResources().getString(R.string.error_gallery_media), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public Bitmap rotateBitmapOrientation(String photoFilePath) {
+        // Create and configure BitmapFactory
+        BitmapFactory.Options bounds = new BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoFilePath, bounds);
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        Bitmap bm = BitmapFactory.decodeFile(photoFilePath, opts);
+        // Read EXIF Data
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(photoFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+        int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+        int rotationAngle = 270;
+        //if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+        //if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
+        //if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
+        // Rotate Bitmap
+        Matrix matrix = new Matrix();
+        matrix.setRotate(rotationAngle, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bm, 0, 0, bounds.outWidth, bounds.outHeight, matrix, true);
+        // Return result
+        return rotatedBitmap;
+    }
+
+    public Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if (Build.VERSION.SDK_INT > 27) {
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    // Returns the File for a photo stored on disk given the fileName
+    public File getPhotoFileUri(String fileName) {
+        // Get safe storage directory for photos
+        // Use `getExternalFilesDir` on Context to access package-specific directories.
+        // This way, we don't need to request external read/write runtime permissions.
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+            Log.d(TAG, "Failed to create directory");
+        }
+
+        // Return the file target for the photo based on filename
+        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
+
+        return file;
+    }
+
+    // Minimizes the soft keyboard
+    public void hideSoftKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public boolean getPermissionToReadExternalStorage(final Context context) {
+        int currentAPIVersion = Build.VERSION.SDK_INT;
+        if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions((Activity) context, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE }, MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                return false;
+            }
+            else return true;
+        }
+        else return true;
     }
 }
