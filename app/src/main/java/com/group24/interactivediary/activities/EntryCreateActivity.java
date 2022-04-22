@@ -164,15 +164,16 @@ public class EntryCreateActivity extends AppCompatActivity implements LocationLi
             // Images
             for (Object imagePairObject : mediaItemsLists.get(0)) {
                 Pair<Bitmap, String> imagePair = (Pair<Bitmap, String>) imagePairObject;
-
+                mediaItemDescriptions.add(imagePair.second);
                 imageViewIds.add(addImageView(context, imagePair.first, imagePair.second));
             }
             // Videos
             for (Object videoPairObject : mediaItemsLists.get(1)) {
                 Pair<File, String> videoPair = (Pair<File, String>) videoPairObject;
-
+                mediaItemDescriptions.add(videoPair.second);
                 videoViewIds.add(addVideoView(context, videoPair.first, videoPair.second));
             }
+            mediaItems = entry.getMediaItemsAsParseFiles();
             titleEditText.setText(entry.getTitle());
             textEditText.setText(entry.getText());
 

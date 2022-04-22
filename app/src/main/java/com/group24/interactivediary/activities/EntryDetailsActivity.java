@@ -238,6 +238,7 @@ public class EntryDetailsActivity extends AppCompatActivity {
 
     private void bindEntryToLayout() {
         // Bind the entry to the layout
+        mediaLinearLayout.removeAllViews();
         List<List> mediaItemsLists = entry.getMediaItems();
         // Images
         for (Object imagePairObject : mediaItemsLists.get(0)) {
