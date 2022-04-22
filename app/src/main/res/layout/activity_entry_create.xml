@@ -8,7 +8,9 @@
     android:layout_height="match_parent"
     android:layout_alignParentEnd="true"
     android:layout_alignParentBottom="true"
-    tools:context=".activities.EntryCreateActivity">
+    tools:context=".activities.EntryCreateActivity"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"

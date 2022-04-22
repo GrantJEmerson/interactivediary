@@ -6,7 +6,9 @@
     android:id="@+id/loginSignupRelativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.LoginSignupActivity">
+    tools:context=".activities.LoginSignupActivity"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
 
     <ScrollView
         android:layout_width="match_parent"
